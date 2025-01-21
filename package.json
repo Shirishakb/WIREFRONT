@@ -1,5 +1,5 @@
 {
-  "name": "coding-quiz",
+  "name": "wire-front",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -23,6 +23,7 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.1"
+    "@vitejs/plugin-react": "^4.3.1",
+    "react-draggable": "^4.4.6"
   }
 }
