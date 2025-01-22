@@ -29,14 +29,6 @@ app.register_blueprint(project_bp)
 app.register_blueprint(page_bp)
 app.register_blueprint(component_bp)
 
-@app.route("/test-db", methods=["GET"])
-def test_db():
-    try:
-        mongo.db.command("ping")  # Pings MongoDB to test the connection
-        return {"status": "success", "message": "Connected to MongoDB Atlas"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}, 500
-
 
 
 # Run the app
