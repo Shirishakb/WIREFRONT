@@ -12,9 +12,11 @@ const Dashboard = () => {
             const user = auth.getProfile();
         } else {
             const user = null;
+        } else {
+            setUser(null);
         }
-        // Display user projects
-    }
+    }, []);
+    // Display user projects
 
     const userProjects = () => {
         // Get user projects
