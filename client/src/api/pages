@@ -1,0 +1,118 @@
+import auth from '../utils/auth';
+
+// GET Pages by projectId
+const getPages = async (projectId) => {
+    try {
+        const response = await fetch(`/api/page/${projectId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// POST Page
+const createPage = async (projectId, pageName) => {
+    try {
+        const response = await fetch(`/api/page/${projectId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ pageName: pageName }),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// PUT Page
+const updatePage = async ( pageId, pageName, pageWidth, pageHeight ) => {
+    try {
+        const response = await fetch(`/api/page/${pageId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ 
+                    pageName: pageName,
+                    pageWidth: pageWidth,
+                    pageHeight: pageHeight
+                }),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// DELETE Page
+const deletePage = async (pageId) => {
+    try {
+        const response = await fetch(`/api/page/${pageId}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+export default {
+    getPages,
+    createPage,
+    updatePage,
+    deletePage
+};

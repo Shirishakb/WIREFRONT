@@ -1,0 +1,144 @@
+import auth from '../utils/auth';
+
+// GET All Projects
+const getProjects = async () => {
+    try {
+        const response = await fetch(`/api/project`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// GET Projects by userId
+const getUserProjects = async (userId) => {
+    try {
+        const response = await fetch(`/api/project/${userId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// POST Project
+const createProject = async (userId, projectName) => {
+    try {
+        const response = await fetch(`/api/project/${userId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ projectName: projectName })
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// PUT Project
+const updateProject = async (projectId, projectName) => {
+    try {
+        const response = await fetch(`/api/project/${projectId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ 
+                    projectName: projectName 
+                }),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// DELETE Project
+const deleteProject = async (projectId) => {
+    try {
+        const response = await fetch(`/api/project/${projectId}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+export default {
+    getProjects,
+    getUserProjects,
+    createProject,
+    updateProject,
+    deleteProject
+};
+

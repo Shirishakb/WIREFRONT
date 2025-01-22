@@ -1,0 +1,138 @@
+import auth from '../utils/auth';
+
+// GET Components by pageId
+const getComponents = async (pageId) => {
+    try {
+        const response = await fetch(`/api/comp/${pageId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// POST Component
+const createComponent = async (pageId, compType, compSet) => {
+    try {
+        const response = await fetch(`/api/comp/${pageId}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ 
+                    compType: compType,
+                    compSet: compSet
+                 }),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// PUT Component
+const updateComponent = async ( compId, compType, compSet, compWidth, compHeight, compXPos, compYPos, radioGroup = null, nodePage = null, parentComp = null, lockFlag = null ) => {
+    try {
+        const compBody = { 
+            compType: compType,
+            compSet: compSet,
+            compWidth: compWidth,
+            compHeight: compHeight,
+            compXPos: compXPos,
+            compYPos: compYPos,
+        };
+        if (radioGroup) {
+            compBody.radioGroup = radioGroup;
+        }
+        if (nodePage) {
+            compBody.nodePage = nodePage;
+        }
+        if (parentComp) {
+            compBody.parentComp = parentComp;
+        }
+        if (lockFlag) {
+            compBody.lockFlag = lockFlag;
+        }
+
+        const response = await fetch(`/api/comp/${compId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ compBody}),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// DELETE Component
+const deleteComponent = async (compId) => {
+    try {
+        const response = await fetch(`/api/comp/${compId}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+export default {
+    getComponents,
+    createComponent,
+    updateComponent,
+    deleteComponent
+};
