@@ -20,16 +20,32 @@ def create_project():
 
 
 # Get all projects for a specific user
+@project_bp.route("/api/project/<userId>", methods=["GET"])
+def get_all_projects():
+    all_projects = list(projects.find({}))
+    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+
+
+# Get all projects
 @project_bp.route("/api/project", methods=["GET"])
 def get_all_projects():
     all_projects = list(projects.find({}))
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+
 
 # Get a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["GET"])
 def get_project(projectId):
     project = projects.find_one({"_id": ObjectId(projectId)})
     return jsonify({"projectId": str(project["_id"]), "projectName": project["projectName"]})
+
+
+# Update a specific project by ID
+@project_bp.route("/api/project/<projectId>", methods=["PUT"])
+def update_project(projectId):
+    data = request.json
+    projects.update_one({"_id": ObjectId(projectId)}, {"$set": data})
+    return jsonify({"msg": "Project updated"})
 
 
 # Get a specific project by ID to delete
