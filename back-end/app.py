@@ -17,7 +17,7 @@ load_dotenv()
 print("Mongo URI:", os.getenv("MONGODB_URI"))
 
 # Initialize Flask app
-app = Flask(__name__, static_folder='../client', static_url_path='')
+app = Flask(__name__, static_folder='../client/dist', static_url_path='')
 
 # Flask config
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "your_jwt_secret")  # Load JWT_SECRET_KEY from .env or default value
