@@ -6,14 +6,13 @@
     "start": "cd server && npm run start",
     "seed": "cd server && npm run seed",
     "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
-    "install": "cd server && npm i && cd ../client && npm i",
-    "build": "concurrently \"cd server && npm run build\" \"cd client && npm run build\" \" pip install -r back-end/requirements.txt\" ",
+    "install": "cd client && npm i",
+    "build": "concurrently \"cd server && npm run build\" \"cd client && npm run build\" \"pip install -r back-end/requirements.txt\"",
     "render-build": "npm install && npm run build",
     "test": "npx cypress run --browser electron",
     "test-component": "npx cypress run --component",
     "test-gui": "npx cypress open",
     "proxy": "http://127.0.0.1:5000"
-
   },
   "keywords": [],
   "author": "",
