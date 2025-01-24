@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-
-import auth from '../utils/auth.js';
+//import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+//import auth from '../utils/auth.js';
 
 const Dashboard = () => {
 
-    const [user, setUser] = useState(null);
+    /*const [user, setUser] = useState(null);
 
     useEffect(() => {
         // Get user projects
@@ -31,12 +31,15 @@ const Dashboard = () => {
         // Set user
         const user = 'user';
     }
-
+*/
+    const user = true
+    const userProjects = 'userProjects';
+    const communityProjects = 'communityProjects';
     if (user) {
         return (
             <div>
                 <h1>Dashboard</h1>
-                <h2>Welcome {user}!</h1>
+                <h2>Welcome {user}!</h2>
                 <div>
                     {userProjects}
                 </div>
