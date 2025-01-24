@@ -20,7 +20,7 @@ def create_project():
 
 
 # Get all projects for a specific user
-@project_bp.route("/api/project/<userId>", methods=["GET"])
+@project_bp.route("/api/project/userId/<userId>", methods=["GET"])
 def get_all_projects_specific_user():
     all_projects = list(projects.find({}))
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
