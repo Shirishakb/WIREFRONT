@@ -30,6 +30,14 @@ def create_page():
 @page_bp.route("/api/page/<projectId>", methods=["GET"])
 @jwt_required()
 def get_pages_by_project(projectId):
+
+    id = '123'
+
+    try:
+        id = ObjectId(projectId)
+    except Exception as e:
+        return jsonify({"msg": "Invalid project ID"}), 400
+
     # Ensure the project exists
     if not projects.find_one({"_id": ObjectId(projectId)}):
         return jsonify({"msg": "Project not found"}), 404
