@@ -1,9 +1,9 @@
 import auth from '../utils/auth';
 
-// GET Pages by projectId
-const getPages = async (projectId) => {
+// GET All Projects
+const getProjects = async () => {
     try {
-        const response = await fetch(`/api/page/${projectId}`,
+        const response = await fetch(`/api/project`,
             {
                 method: 'GET',
                 headers: {
@@ -26,17 +26,16 @@ const getPages = async (projectId) => {
     }
 };
 
-// POST Page
-const createPage = async (projectId, pageName) => {
+// GET Projects by userId
+const getUserProjects = async (userId: string) => {
     try {
-        const response = await fetch(`/api/page/${projectId}`,
+        const response = await fetch(`/api/project/${userId}`,
             {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
                 },
-                body: JSON.stringify({ pageName: pageName }),
             }
         );
   
@@ -53,20 +52,45 @@ const createPage = async (projectId, pageName) => {
     }
 };
 
-// PUT Page
-const updatePage = async ( pageId, pageName, pageWidth, pageHeight ) => {
+// GET Projects by projectId
+const getProjectById = async (projectId: string) => {
+  try {
+      const response = await fetch(`/api/project/${projectId}`,
+          {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  authorization: `Bearer ${auth.getToken()}`,
+              },
+          }
+      );
+
+    const data = await response.json();
+
+    if(!response.ok) {
+      throw new Error('invalid API response, check network tab!');
+    }
+
+    return data;
+  } catch (err) {
+    console.log('Error from data retrieval: ', err);
+    return null;
+  }
+};
+
+// POST Project
+const createProject = async (userId: string, projectName: string) => {
     try {
-        const response = await fetch(`/api/page/${pageId}`,
+        const response = await fetch(`/api/project`,
             {
-                method: 'PUT',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
                 },
                 body: JSON.stringify({ 
-                    pageName: pageName,
-                    pageWidth: pageWidth,
-                    pageHeight: pageHeight
+                  userId: userId,
+                  projectName: projectName
                 }),
             }
         );
@@ -84,10 +108,39 @@ const updatePage = async ( pageId, pageName, pageWidth, pageHeight ) => {
     }
 };
 
-// DELETE Page
-const deletePage = async (pageId) => {
+// PUT Project
+const updateProject = async (projectId: string, projectName: string) => {
     try {
-        const response = await fetch(`/api/page/${pageId}`,
+        const response = await fetch(`/api/project/${projectId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    authorization: `Bearer ${auth.getToken()}`,
+                },
+                body: JSON.stringify({ 
+                    projectName: projectName 
+                }),
+            }
+        );
+  
+      const data = await response.json();
+  
+      if(!response.ok) {
+        throw new Error('invalid API response, check network tab!');
+      }
+  
+      return data;
+    } catch (err) {
+      console.log('Error from data retrieval: ', err);
+      return null;
+    }
+};
+
+// DELETE Project
+const deleteProject = async (projectId: string) => {
+    try {
+        const response = await fetch(`/api/project/${projectId}`,
             {
                 method: 'DELETE',
                 headers: {
@@ -110,9 +163,12 @@ const deletePage = async (pageId) => {
     }
 };
 
-export default {
-    getPages,
-    createPage,
-    updatePage,
-    deletePage
+export {
+    getProjects,
+    getUserProjects,
+    getProjectById,
+    createProject,
+    updateProject,
+    deleteProject
 };
+

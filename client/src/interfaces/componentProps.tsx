@@ -1,5 +1,5 @@
 export interface componentProps {
-    id: number;
+    id: string;
     type: string;
     properties: {
         text?: string;

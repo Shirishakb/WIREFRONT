@@ -1,9 +1,9 @@
 import auth from '../utils/auth';
 
-// GET All Projects
-const getProjects = async () => {
+// GET Pages by projectId
+const getPages = async (projectId: string) => {
     try {
-        const response = await fetch(`/api/project`,
+        const response = await fetch(`/api/page/${projectId}`,
             {
                 method: 'GET',
                 headers: {
@@ -26,16 +26,59 @@ const getProjects = async () => {
     }
 };
 
-// GET Projects by userId
-const getUserProjects = async (userId) => {
+// GET Pages by projectId
+const getPageById = async (pageId: string) => {
+  try {
+      const response = await fetch(`/api/page/id/${pageId}`,
+          {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  authorization: `Bearer ${auth.getToken()}`,
+              },
+          }
+      );
+
+    const data = await response.json();
+
+    if(!response.ok) {
+      throw new Error('invalid API response, check network tab!');
+    }
+
+    return data;
+  } catch (err) {
+    console.log('Error from data retrieval: ', err);
+    return null;
+  }
+};
+
+// POST Page
+const createPage = async (projectId: string, pageName: string, pageWidth: number | null = null, pageHeight: number | null = null ) => {
     try {
-        const response = await fetch(`/api/project/${userId}`,
+        const pageBody: {
+            projectId: string,
+            pageName: string,
+            pageWidth?: number,
+            pageHeight?: number,
+        } = {
+            projectId: projectId,
+            pageName: pageName,
+        };
+        if (pageWidth) {
+            pageBody.pageWidth = pageWidth;
+        }
+        if (pageHeight) {
+            pageBody.pageHeight = pageHeight;
+        }
+
+        const response = await fetch(`/api/page`,
             {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
                 },
+                body: JSON.stringify( pageBody),
             }
         );
   
@@ -52,37 +95,10 @@ const getUserProjects = async (userId) => {
     }
 };
 
-// POST Project
-const createProject = async (userId, projectName) => {
+// PUT Page
+const updatePage = async ( pageId: string, pageName: string, pageWidth: number | null, pageHeight: number | null ) => {
     try {
-        const response = await fetch(`/api/project/${userId}`,
-            {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    authorization: `Bearer ${auth.getToken()}`,
-                },
-                body: JSON.stringify({ projectName: projectName })
-            }
-        );
-  
-      const data = await response.json();
-  
-      if(!response.ok) {
-        throw new Error('invalid API response, check network tab!');
-      }
-  
-      return data;
-    } catch (err) {
-      console.log('Error from data retrieval: ', err);
-      return null;
-    }
-};
-
-// PUT Project
-const updateProject = async (projectId, projectName) => {
-    try {
-        const response = await fetch(`/api/project/${projectId}`,
+        const response = await fetch(`/api/page/${pageId}`,
             {
                 method: 'PUT',
                 headers: {
@@ -90,7 +106,9 @@ const updateProject = async (projectId, projectName) => {
                     authorization: `Bearer ${auth.getToken()}`,
                 },
                 body: JSON.stringify({ 
-                    projectName: projectName 
+                    pageName: pageName,
+                    pageWidth: pageWidth,
+                    pageHeight: pageHeight
                 }),
             }
         );
@@ -108,10 +126,10 @@ const updateProject = async (projectId, projectName) => {
     }
 };
 
-// DELETE Project
-const deleteProject = async (projectId) => {
+// DELETE Page
+const deletePage = async (pageId: string) => {
     try {
-        const response = await fetch(`/api/project/${projectId}`,
+        const response = await fetch(`/api/page/${pageId}`,
             {
                 method: 'DELETE',
                 headers: {
@@ -134,11 +152,10 @@ const deleteProject = async (projectId) => {
     }
 };
 
-export default {
-    getProjects,
-    getUserProjects,
-    createProject,
-    updateProject,
-    deleteProject
+export {
+    getPages,
+    getPageById,
+    createPage,
+    updatePage,
+    deletePage
 };
-
