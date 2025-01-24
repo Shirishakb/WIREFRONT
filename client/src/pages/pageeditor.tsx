@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd';
+import Rnd, { RndResizeCallback, RndDragCallback } from 'react-rnd';
 
 interface Component {
   id?: string;
@@ -16,70 +16,165 @@ interface PageEditorProps {
 const PageEditor = ({ pageId }: PageEditorProps) => {
   const [components, setComponents] = useState<Component[]>([]);
 
-  // Fetch components (only if backend is implemented)
+  // Fetch components from the backend
   useEffect(() => {
     const fetchComponents = async () => {
       try {
         const response = await fetch(`http://127.0.0.1:5000/api/comp/${pageId}`, {
           method: 'GET',
-          headers: { Authorization: 'Bearer YOUR_TOKEN_HERE', 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: 'Bearer YOUR_TOKEN_HERE',
+            'Content-Type': 'application/json',
+          },
         });
-        if (!response.ok) throw new Error('Failed to fetch components');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch components');
+        }
+
         const data = await response.json();
         setComponents(data);
       } catch (error) {
-        console.error('Error fetching components:', error);
+        if (error instanceof Error) {
+          console.error('Error fetching components:', error.message);
+        } else {
+          console.error('Error fetching components:', error);
+        }
       }
     };
+
     fetchComponents();
   }, [pageId]);
 
-  // Add new component
-  const addComponent = (newComponent: Component) => {
-    setComponents((prev) => [...prev, newComponent]);
+  // Add a new component
+  const addComponent = async (newComponent: Component) => {
+    try {
+      setComponents((prev) => [...prev, newComponent]); // Optimistic update
+      const response = await fetch('http://127.0.0.1:5000/api/comp', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer YOUR_TOKEN_HERE',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newComponent),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add component');
+      }
+
+      const savedComponent = await response.json();
+      setComponents((prev) =>
+        prev.map((comp) =>
+          comp === newComponent ? { ...newComponent, id: savedComponent.id } : comp
+        )
+      );
+    } catch (error) {
+      console.error('Error adding component:', (error as Error).message);
+    }
   };
 
-  // Update existing component
-  const updateComponent = (id: string, updates: Partial<Component>) => {
-    setComponents((prev) => prev.map((comp) => (comp.id === id ? { ...comp, ...updates } : comp)));
+  // Update a component
+  const updateComponent = async (
+    id: string,
+    updates: Partial<Component>
+  ) => {
+    if (!id) return;
+
+    try {
+      setComponents((prev) =>
+        prev.map((comp) => (comp.id === id ? { ...comp, ...updates } : comp))
+      );
+
+      const response = await fetch(`http://127.0.0.1:5000/api/comp/${id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer YOUR_TOKEN_HERE',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update component');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error updating component:', error.message);
+      } else {
+        console.error('Error updating component:', error);
+      }
+    }
   };
 
   // Delete a component
-  const deleteComponent = (id: string) => {
-    setComponents((prev) => prev.filter((comp) => comp.id !== id));
+  const deleteComponent = async (id: string) => {
+    if (!id) return;
+
+    try {
+      setComponents((prev) => prev.filter((comp) => comp.id !== id));
+
+      const response = await fetch(`http://127.0.0.1:5000/api/comp/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer YOUR_TOKEN_HERE',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete component');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error deleting component:', error.message);
+      } else {
+        console.error('Error deleting component:', error);
+      }
+    }
   };
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <button
-        onClick={() =>
-          addComponent({
-            type: '',
+        onClick={() => {
+          const newComponent: Component = {
+            type: '', // Ensure the caller provides the type
             properties: {},
             position: { x: 0, y: 0 },
             size: { width: 100, height: 50 },
-          })
-        }
+          };
+          addComponent(newComponent);
+        }}
       >
         Add Component
       </button>
       <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: '#f0f0f0' }}>
         {components.map((component) => (
           <Rnd
-            key={component.id || Math.random()}
+            key={component.id}
             size={component.size}
             position={component.position}
-            onDragStop={(e: any, data: { x: number; y: number }) => updateComponent(component.id!, { position: { x: data.x, y: data.y } })}
-            onResizeStop={(e: any, dir: any, ref: HTMLElement, delta: any, position: { x: number; y: number }) =>
-              updateComponent(component.id!, {
-                size: { width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) },
-                position,
-              })
-            }
+            onDragStop={((_, data) => {
+              if (component.id) {
+                updateComponent(component.id, { position: { x: data.x, y: data.y } });
+              }
+            }) as RndDragCallback}
+            onResizeStop={((_, __, ref, ___, position) => {
+              if (component.id) {
+                updateComponent(component.id, {
+                  size: {
+                    width: parseInt(ref.style.width, 10),
+                    height: parseInt(ref.style.height, 10),
+                  },
+                  position,
+                });
+              }
+            }) as RndResizeCallback}
           >
             <div style={{ border: '1px solid #000', padding: '5px' }}>
               <span>Type: {component.type || 'N/A'}</span>
-              <button onClick={() => deleteComponent(component.id!)} style={{ marginLeft: '10px' }}>
+              <button onClick={() => component.id && deleteComponent(component.id)} style={{ marginLeft: '10px' }}>
                 Delete
               </button>
             </div>
