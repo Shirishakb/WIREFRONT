@@ -34,6 +34,7 @@ app.register_blueprint(project_bp)
 app.register_blueprint(page_bp)
 app.register_blueprint(component_bp)
 
+
 # Global error handler
 @app.errorhandler(Exception)
 def handle_exception(e):
@@ -57,6 +58,7 @@ def login():
     username = "user"  # Just an example, authenticate with your user data
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token), 200
+
 
 # Serve React app on the root URL
 @app.route('/')
