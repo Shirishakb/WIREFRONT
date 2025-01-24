@@ -1,83 +1,93 @@
-import React, { useState } from 'react';
-import Draggable, { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
-import ComponentRenderer from '../components/componentRenderer.tsx';
-import { COMPONENT_TYPES } from '../constants';
-import ComponentProps from '../interfaces/componentProps.tsx';
-import componentApi from '../../../server/src/routes/api/componentApi.ts';
-import styles from '../styles/pageEditor.module.css';
+import { useState, useEffect } from 'react';
+import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd';
 
-const PageEditor: React.FC = () => {
-    const [components, setComponents] = useState<ComponentProps[]>([]);
+interface Component {
+  id?: string;
+  type: string;
+  properties: object;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+}
 
-    const addComponent = (type: string) => {
-        setComponents((prev) => [
-            ...prev,
-            {
-                id: Date.now(),
-                type,
-                properties: { text: '', placeholder: '', options: [], href: '', label: '' },
-                position: { x: 0, y: 0 },
-                size: { width: 150, height: 50 },
-            },
-        ]);
+interface PageEditorProps {
+  pageId: string;
+}
+
+const PageEditor = ({ pageId }: PageEditorProps) => {
+  const [components, setComponents] = useState<Component[]>([]);
+
+  // Fetch components (only if backend is implemented)
+  useEffect(() => {
+    const fetchComponents = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/api/comp/${pageId}`, {
+          method: 'GET',
+          headers: { Authorization: 'Bearer YOUR_TOKEN_HERE', 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error('Failed to fetch components');
+        const data = await response.json();
+        setComponents(data);
+      } catch (error) {
+        console.error('Error fetching components:', error);
+      }
     };
+    fetchComponents();
+  }, [pageId]);
 
-    const updateComponent = (id: number, updates: Partial<ComponentProps['properties']>) => {
-        setComponents((prev) =>
-            prev.map((comp) => (comp.id === id ? { ...comp, properties: { ...comp.properties, ...updates } } : comp))
-        );
-    };
+  // Add new component
+  const addComponent = (newComponent: Component) => {
+    setComponents((prev) => [...prev, newComponent]);
+  };
 
-    const deleteComponent = async (id: number) => {
-        try {
-            await componentApi.delete(id);
-            setComponents((prev) => prev.filter((comp) => comp.id !== id));
-        } catch (error) {
-            console.error('Error deleting component:', error);
+  // Update existing component
+  const updateComponent = (id: string, updates: Partial<Component>) => {
+    setComponents((prev) => prev.map((comp) => (comp.id === id ? { ...comp, ...updates } : comp)));
+  };
+
+  // Delete a component
+  const deleteComponent = (id: string) => {
+    setComponents((prev) => prev.filter((comp) => comp.id !== id));
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <button
+        onClick={() =>
+          addComponent({
+            type: '',
+            properties: {},
+            position: { x: 0, y: 0 },
+            size: { width: 100, height: 50 },
+          })
         }
-    };
-
-    const saveAllComponents = async () => {
-        try {
-            await componentApi.save(components);
-            alert('Components saved successfully!');
-        } catch (error) {
-            console.error('Error saving components:', error);
-        }
-    };
-
-    return (
-        <div>
-            <div>
-                {Object.values(COMPONENT_TYPES).map((type) => (
-                    <button key={type} onClick={() => addComponent(type)}>
-                        Add {type}
-                    </button>
-                ))}
-                <button onClick={saveAllComponents}>Save All</button>
+      >
+        Add Component
+      </button>
+      <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: '#f0f0f0' }}>
+        {components.map((component) => (
+          <Rnd
+            key={component.id || Math.random()}
+            size={component.size}
+            position={component.position}
+            onDragStop={(e: any, data: { x: number; y: number }) => updateComponent(component.id!, { position: { x: data.x, y: data.y } })}
+            onResizeStop={(e: any, dir: any, ref: HTMLElement, delta: any, position: { x: number; y: number }) =>
+              updateComponent(component.id!, {
+                size: { width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) },
+                position,
+              })
+            }
+          >
+            <div style={{ border: '1px solid #000', padding: '5px' }}>
+              <span>Type: {component.type || 'N/A'}</span>
+              <button onClick={() => deleteComponent(component.id!)} style={{ marginLeft: '10px' }}>
+                Delete
+              </button>
             </div>
-            <div className={styles.container}>
-                {components.map((component) => (
-                    <Draggable
-                        key={component.id}
-                        onStop={(_: DraggableEvent, data: DraggableData) => {
-                            setComponents((prev) =>
-                                prev.map((comp) =>
-                                    comp.id === component.id
-                                        ? { ...comp, position: { x: data.x, y: data.y } }
-                                        : comp
-                                )
-                            );
-                        }}
-                    >
-                        <div className={styles.component} style={{ width: component.size.width, height: component.size.height, position: 'absolute', left: component.position.x, top: component.position.y }}>
-                            <ComponentRenderer component={component} onUpdate={updateComponent} onDelete={deleteComponent} />
-                        </div>
-                    </DraggableCore>
-                ))}
-            </div>
-        </div>
-    );
+          </Rnd>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default PageEditor;
