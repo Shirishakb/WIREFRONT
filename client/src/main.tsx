@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 import App from './App.jsx'
 import LandingPage from './pages/LandingPage'
+import PageEditor from './pages/pageeditor'
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <LandingPage />
+      },
+      {
+        path: '/pageeditor/:pageId',
+        element: <PageEditor />
       }
     ]
   }

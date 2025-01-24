@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import Rnd, { RndResizeCallback, RndDragCallback } from 'react-rnd';
+import {Rnd, RndResizeCallback, RndDragCallback } from 'react-rnd';
+import { useParams } from 'react-router-dom';
 
 interface Component {
   id?: string;
@@ -10,17 +11,23 @@ interface Component {
 }
 
 interface PageEditorProps {
-  pageId: string;
+  //pageId: string;
 }
 
-const PageEditor = ({ pageId }: PageEditorProps) => {
+const PageEditor = ({ }: PageEditorProps) => {
   const [components, setComponents] = useState<Component[]>([]);
+
+  //const pageId = 'YOUR_PAGE_ID_HERE';
+    const { pageId } = useParams();
+
+    console.log('pageid', pageId);
+
 
   // Fetch components from the backend
   useEffect(() => {
     const fetchComponents = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/comp/${pageId}`, {
+        const response = await fetch(`/api/comp/${pageId}`, {
           method: 'GET',
           headers: {
             Authorization: 'Bearer YOUR_TOKEN_HERE',
