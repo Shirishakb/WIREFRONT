@@ -1,4 +1,4 @@
-import ComponentProps from '../interfaces/componentProps.tsx';
+import ComponentProps from '../interfaces/componentProps';
 
 export interface componentRenderProps {
     component: ComponentProps;
