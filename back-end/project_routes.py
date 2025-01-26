@@ -22,6 +22,11 @@ def create_project():
 # Get all projects for a specific user
 @project_bp.route("/api/project/userId/<userId>", methods=["GET"])
 def get_all_projects_specific_user():
+    try: 
+        if not ObjectId.is_valid("userId"):
+            raise Exception("Invalid user ID")
+    except:
+        return jsonify({"msg": "Invalid user ID"}), 400
     all_projects = list(projects.find({}))
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
@@ -36,6 +41,12 @@ def get_all_projects():
 # Get a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["GET"])
 def get_project(projectId):
+    try:
+        if not ObjectId.is_valid(projectId):
+            raise Exception("Invalid project ID")
+    except:
+        return jsonify({"msg": "Invalid project ID"}), 400
+
     project = projects.find_one({"_id": ObjectId(projectId)})
     return jsonify({"projectId": str(project["_id"]), "projectName": project["projectName"]})
 
@@ -43,6 +54,11 @@ def get_project(projectId):
 # Update a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["PUT"])
 def update_project(projectId):
+    try:
+        if not ObjectId.is_valid(projectId):
+            raise Exception("Invalid project ID")
+    except:
+        return jsonify({"msg": "Invalid project ID"}), 400
     data = request.json
     projects.update_one({"_id": ObjectId(projectId)}, {"$set": data})
     return jsonify({"msg": "Project updated"})
@@ -52,5 +68,10 @@ def update_project(projectId):
 @project_bp.route("/api/project/<projectId>", methods=["DELETE"])
 @jwt_required()
 def delete_project(projectId):
+    try:
+        if not ObjectId.is_valid(projectId):
+            raise Exception("Invalid project ID")
+    except:
+        return jsonify({"msg": "Invalid project ID"}), 400
     projects.delete_one({"_id": ObjectId(projectId)})
     return jsonify({"msg": "Project deleted"})
