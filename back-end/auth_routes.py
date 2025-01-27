@@ -7,15 +7,30 @@ from models import hash_password, verify_password
 auth_bp = Blueprint("auth", __name__)
 
 
-# Signup route
 @auth_bp.route("/auth/signup", methods=["POST"])
 def signup():
     data = request.json
+    
+    # Check if username already exists
     if users.find_one({"username": data["username"]}):
         return jsonify({"msg": "User already exists"}), 409
-
+    
+    # Add additional validation checks for email and password if needed
+    if not data["email"]:
+        return jsonify({"msg": "Email is required"}), 400
+    if len(data["password"]) < 8:
+        return jsonify({"msg": "Password must be at least 8 characters long"}), 400
+    
+    # Hash password before storing
     hashed_pw = hash_password(data["password"])
-    users.insert_one({"username": data["username"], "password": hashed_pw})
+    
+    # Insert the new user
+    users.insert_one({
+        "username": data["username"],
+        "email": data["email"],
+        "password": hashed_pw
+    })
+    
     return jsonify({"msg": "User created"}), 201
 
 
