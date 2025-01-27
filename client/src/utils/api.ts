@@ -11,7 +11,7 @@ export const getMe = (token: string) => {
 };
 
 export const createUser = (userData: User) => {
-  return fetch('/api/users', {
+  return fetch('/api/auth/signup', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ export const createUser = (userData: User) => {
 };
 
 export const loginUser = (userData: User) => {
-  return fetch('/api/users/login', {
+  return fetch('/api/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
