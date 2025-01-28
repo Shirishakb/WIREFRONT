@@ -2,6 +2,8 @@ import ProjectCard from "../components/projectCard";
 import { Link } from "react-router-dom";
 import Auth from "../utils/auth.js";
 
+import { useEffect, useState } from "react";
+
 interface Project {
     _id: string;
     image: string;
@@ -16,31 +18,50 @@ interface User {
 }
 
 const LandingPage = () => {
-    const projects: Project[] = []
+
+
+    //const projects: Project[] = []
+
+    const [ projects, setProjects ] = useState<Project[]>([]);
 
     const loggedIn: boolean = Auth.loggedIn();
 
-    if (loggedIn) {
-        // Mock data for user
-        const user: User = {
-            _id: "1", 
-            username: "admin",
-            email: "admin@admin.com",
-        }
+    const getProjects = async () => {
+        const response = await fetch("/api/project", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("id_token")}`,
+            },
+        });
+        const data = await response.json();
+        setProjects(data);
+    };
 
-        // Mock data for projects
-        // This will be replaced with a GetUserProjects call
-        for (let i = 0; i < 5; i++) {
-            const projectId = i.toString();
-            const projectName = "Project " + i;
-            const projectImage = "https://via.placeholder.com/150";
-            projects.push({ _id: projectId, name: projectName, image: projectImage, author: '' });
-        }
+    useEffect(() => {
+
+       if (loggedIn) getProjects();
+    }, []);
+
+    return (
+        <div className="text-light bg-dark p-5">
+            {projects.map((project, index) => (
+                <Link to={`/project/${project.projectId}`} key={index}>
+                <ProjectCard key={index} project={project} />
+                </Link>
+            ))}
+        </div>
+    );
+
+    /*
+
+    if (loggedIn) {
+
+
+
+        //projects.push({ _id: projectId, name: projectName, image: projectImage, author: '' });
 
         return (
             <>
                 <div className="text-light bg-dark p-5">
-                    <h1>Welcome back, {user.username}!</h1>
                     {projects.map((project, index) => (
                         <Link to={`/project/${project._id}`} key={index}>
                           <ProjectCard key={index} project={project} />
@@ -72,6 +93,9 @@ const LandingPage = () => {
       </>
       );
     }
+
+    */
+
 };
 
 export default LandingPage;

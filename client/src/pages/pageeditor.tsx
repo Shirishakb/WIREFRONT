@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import {Rnd, RndResizeCallback, RndDragCallback } from 'react-rnd';
 import { useParams } from 'react-router-dom';
 
+import { getComponents, createComponent } from '../api/components'; //C:\Users\shiri\Downloads\2024-edx\WIREFRONT\client\src\api\components.ts
+
 interface Component {
   id?: string;
   type: string;
@@ -20,44 +22,28 @@ const PageEditor = ({ }: PageEditorProps) => {
   //const pageId = 'YOUR_PAGE_ID_HERE';
     const { pageId } = useParams();
 
-    console.log('pageid', pageId);
+    const fetchComponents = async () => {
 
+      const data:any = await getComponents(pageId || '');
+
+      setComponents(data);
+
+
+    };
 
   // Fetch components from the backend
   useEffect(() => {
-    const fetchComponents = async () => {
-      try {
-        const response = await fetch(`/api/comp/${pageId}`, {
-          method: 'GET',
-          headers: {
-            Authorization: 'Bearer YOUR_TOKEN_HERE',
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch components');
-        }
-
-        const data = await response.json();
-        setComponents(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error('Error fetching components:', error.message);
-        } else {
-          console.error('Error fetching components:', error);
-        }
-      }
-    };
-
     fetchComponents();
   }, [pageId]);
 
+
+
+  /*
   // Add a new component
   const addComponent = async (newComponent: Component) => {
     try {
       setComponents((prev) => [...prev, newComponent]); // Optimistic update
-      const response = await fetch('http://127.0.0.1:5000/api/comp', {
+      const response = await fetch('/api/comp', {
         method: 'POST',
         headers: {
           Authorization: 'Bearer YOUR_TOKEN_HERE',
@@ -80,6 +66,7 @@ const PageEditor = ({ }: PageEditorProps) => {
       console.error('Error adding component:', (error as Error).message);
     }
   };
+  */
 
   // Update a component
   const updateComponent = async (
@@ -144,22 +131,28 @@ const PageEditor = ({ }: PageEditorProps) => {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <button
-        onClick={() => {
+        onClick={async () => {
           const newComponent: Component = {
             type: '', // Ensure the caller provides the type
             properties: {},
             position: { x: 0, y: 0 },
             size: { width: 100, height: 50 },
           };
-          addComponent(newComponent);
+          //addComponent(newComponent);
+          if (pageId) {
+            
+            await createComponent(pageId, 'button', JSON.stringify(newComponent));
+
+            fetchComponents();
+          }
         }}
       >
         Add Component
       </button>
       <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: '#f0f0f0' }}>
-        {components.map((component) => (
+        {components.map((component, index) => (
           <Rnd
-            key={component.id}
+            key={index}
             size={component.size}
             position={component.position}
             onDragStop={((_, data) => {
