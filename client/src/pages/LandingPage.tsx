@@ -6,16 +6,18 @@ import { useEffect, useState } from "react";
 
 interface Project {
     _id: string;
+    projectName: string;
+    projectId: string;
     image: string;
     name: string;
     author: string;
 }
 
-interface User {
+/*interface User {
     _id: string;
     username: string;
     email: string;
-}
+}*/
 
 const LandingPage = () => {
 

@@ -37,7 +37,8 @@ const AppNavbar = () => {
                       }).then(async (r:any) => {
 
                         if (!r.ok) {
-                          console.log('Failed to create project', data);
+                          const errorData = await r.json();
+                          console.log('Failed to create project', errorData);
                           return;
                         }
 
