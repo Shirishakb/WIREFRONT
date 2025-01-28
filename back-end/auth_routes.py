@@ -31,8 +31,16 @@ def signup():
         "password": hashed_pw
     }
     users.insert_one(user_data)
+
+    access_token = create_access_token(
+        identity=str(user_data["_id"]),
+        additional_claims={
+            "email": user_data["email"],
+            "username": user_data["username"]
+        }
+    )
     
-    return jsonify({"msg": "User created"}), 201
+    return jsonify(access_token=access_token), 201
 
 # Login route
 @auth_bp.route("/auth/login", methods=["POST"])
