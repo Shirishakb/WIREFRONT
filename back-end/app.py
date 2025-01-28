@@ -74,7 +74,6 @@ def serve_static(path):
 # Run the app
 if __name__ == "__main__":
     # Logging setup for better error monitoring
-    logging.basicConfig(level=logging.DEBUG)  # Logs all messages with severity level DEBUG and higher
     app.run(debug=False, host="0.0.0.0", port=5000)  # Debug mode off for production
 
 
