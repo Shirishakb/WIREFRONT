@@ -7,10 +7,11 @@ interface Page {
   }
   
   const PageCard = ({ page }: { page: Page }) => {
+    console.log('pageImg', page.image);
     return (
-      <div className="project-card">
-          <img src={page.image} alt={page.name} />
-          <h3>{page.name}</h3>
+      <div className="pageCard bg-dark">
+          <img className="pageImg" src={page.image} alt={page.name} />
+          <h3 className="pageH3">{page.name}</h3>
       </div>
       );
   }
