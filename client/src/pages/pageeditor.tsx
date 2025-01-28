@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Rnd } from 'react-rnd';
+import { Rnd } from 'react-rnd'; // Using react-rnd for resizing and dragging
 import { useParams } from 'react-router-dom';
 import { getComponents } from '../api/components';
 import { COMPONENT_TYPES } from '../constants';
@@ -20,7 +20,6 @@ const PageEditor = () => {
   const [removedComponents, setRemovedComponents] = useState<Component[]>([]); // Removed components
   const [newComponentType, setNewComponentType] = useState(COMPONENT_TYPES.BUTTON); // Default type
   const [chosenComponents, setChosenComponents] = useState<Component[]>([]); // Chosen components
-  const [feedbackMessage, setFeedbackMessage] = useState<string>(''); // Feedback for updates
 
   useEffect(() => {
     fetchComponents();
@@ -94,8 +93,7 @@ const PageEditor = () => {
               : comp
           )
         );
-        setFeedbackMessage(`Component ${id} updated successfully.`);
-        setTimeout(() => setFeedbackMessage(''), 3000);
+        alert('Component updated successfully!');
       }
     }
   };
@@ -147,14 +145,10 @@ const PageEditor = () => {
         return <div style={{ color: 'red' }}>Component type not recognized</div>;
     }
   };
-  
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h2 style={{ color: '#4CAF50' }}>Interactive Page Editor</h2>
-
-      {feedbackMessage && (
-        <div style={{ padding: '10px', backgroundColor: '#dff0d8', color: '#3c763d', borderRadius: '5px' }}>{feedbackMessage}</div>
-      )}
 
       <div>
         <label htmlFor="componentType">Choose Component: </label>
@@ -228,12 +222,13 @@ const PageEditor = () => {
         )}
       </div>
 
-      <div style={{ border: '1px solid #ddd', padding: '10px', background: '#f9f9f9' }}>
+      {/* Removed Components List */}
+      <div style={{ marginTop: '20px' }}>
         <h3>Removed Components</h3>
         {removedComponents.length > 0 ? (
           <ul>
             {removedComponents.map((component) => (
-              <li key={component.id || `${component.type}-${Math.random()}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+              <li key={component.id}>
                 <span>{component.type}</span>
                 <button
                   onClick={() => restoreComponent(component.id || '')}
@@ -253,73 +248,91 @@ const PageEditor = () => {
             ))}
           </ul>
         ) : (
-          <p>No components to restore.</p>
+          <p>No removed components yet.</p>
         )}
       </div>
 
-      <div style={{ position: 'relative', width: '100%', height: '500px', border: '1px solid #ddd', background: '#fff', overflow: 'hidden' }}>
+      {/* Workspace */}
+      <div style={{ position: 'relative', width: '100%', height: '500px', border: '1px solid #ddd', background: '#fff', overflow: 'hidden', marginTop: '20px' }}>
         <h3>Workspace</h3>
         {components.map((component) => (
           <Rnd
-            key={component.id}
-            size={component.size}
-            position={component.position}
-            onDragStop={(_, data) => {
-              setComponents((prev) =>
-                prev.map((comp) =>
-                  comp.id === component.id ? { ...comp, position: { x: data.x, y: data.y } } : comp
-                )
-              );
-            }}
-            onResizeStop={(_, __, ref, ___, position) => {
-              setComponents((prev) =>
-                prev.map((comp) =>
-                  comp.id === component.id
-                    ? { ...comp, size: { width: ref.offsetWidth, height: ref.offsetHeight }, position }
-                    : comp
-                )
-              );
-            }}
-            bounds="parent"
-          >
-            <div style={{ border: '1px dashed #ddd', background: '#f0f0f0', padding: '5px', position: 'relative' }}>
-              {renderComponent(component)}
-              <button
-                onClick={() => editComponentProperties(component.id || '')}
-                style={{
-                  position: 'absolute',
-                  top: '5px',
-                  right: '5px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '3px',
-                  padding: '2px 5px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => removeComponentFromWorkspace(component.id || '')}
-                style={{
-                  position: 'absolute',
-                  top: '30px',
-                  right: '5px',
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '3px',
-                  padding: '2px 5px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          </Rnd>
+          key={component.id}
+          size={component.size}
+          position={component.position}
+          onDragStop={(_, data) => {
+            setComponents((prev) =>
+              prev.map((comp) =>
+                comp.id === component.id ? { ...comp, position: { x: data.x, y: data.y } } : comp
+              )
+            );
+          }}
+          onResizeStop={(_, __, ref, ___, position) => {
+            setComponents((prev) =>
+              prev.map((comp) =>
+                comp.id === component.id
+                  ? { ...comp, size: { width: ref.offsetWidth, height: ref.offsetHeight }, position }
+                  : comp
+              )
+            );
+          }}
+          bounds="parent" // Ensures dragging is within the workspace
+          enableResizing={{
+            top: true,
+            right: true,
+            bottom: true,
+            left: true,
+            topLeft: true,
+            topRight: true,
+            bottomLeft: true,
+            bottomRight: true,
+          }}
+          style={{
+            margin: '0', // Ensure no margins are applied
+            padding: '0', // Remove any padding around the component
+            border: 'none', // Optional: Remove any borders around the component
+            boxSizing: 'border-box', // Make sure the padding and borders do not affect sizing
+          }}
+        >
+          <div style={{ background: '#f0f0f0', width: '100%', height: '100%' }}>
+            {renderComponent(component)}
+            <button
+              onClick={() => editComponentProperties(component.id || '')}
+              style={{
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                backgroundColor: '#2196F3',
+                color: 'white',
+                border: 'none',
+                borderRadius: '3px',
+                padding: '2px 5px',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => removeComponentFromWorkspace(component.id || '')}
+              style={{
+                position: 'absolute',
+                top: '30px',
+                right: '5px',
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '3px',
+                padding: '2px 5px',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              X
+            </button>
+          </div>
+        </Rnd>
+        
         ))}
       </div>
     </div>
