@@ -1,3 +1,7 @@
+:root {
+  --secondary-color: rgba(65,69,73,1)
+}
+
 body {
   font-family: 'Rubik', sans-serif;
 }
@@ -14,4 +18,82 @@ h6 {
 .small {
   font-weight: 300;
   font-style: italic;
+}
+
+#projects, #projectPages {
+  background-color: var(--secondary-color);
+}
+
+#projectsTitle, #pagesTitle {
+  text-align: center;
+}
+
+.projectsContainer, .pagesContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.projectCard, .pageCard {
+  width: 170px;
+  height: 180px;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.projectImg, .pageImg {
+  /*position: absolute;
+  width: 100%;
+  height: 100%;*/
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.projectH3, .pageH3 {
+  overflow: clip;
+  white-space: nowrap;
+  font-size: 1.17em;
+}
+
+.projectP {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+}
+
+#footer {
+  position: sticky;
+  bottom: 0;
+  height: 50px;
+  width: inherit;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.footerLink {
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+  margin: 10px;
+}
+
+.footerImg {
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  border-radius: 15px;
+}
+
+.footerH3 {
+  font-size: 1.25rem;
+  font-family: 'Rubik', sans-serif;
 }

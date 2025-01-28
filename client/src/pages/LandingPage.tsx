@@ -57,18 +57,33 @@ const LandingPage = () => {
 
     if (loggedIn) {
 
+        // Mock data for user
+        const user: User = {
+            _id: "1", 
+            username: "admin",
+            email: "admin@admin.com",
+        }
 
-
-        //projects.push({ _id: projectId, name: projectName, image: projectImage, author: '' });
+        // Mock data for projects
+        // This will be replaced with a GetUserProjects call
+        for (let i = 0; i < 5; i++) {
+            const projectId = i.toString();
+            const projectName = "Project " + i;
+            const projectImage = "./placeholder2.png";
+            projects.push({ _id: projectId, name: projectName, image: projectImage, author: '' });
+        }
 
         return (
             <>
-                <div className="text-light bg-dark p-5">
-                    {projects.map((project, index) => (
-                        <Link to={`/project/${project._id}`} key={index}>
-                          <ProjectCard key={index} project={project} />
-                        </Link>
-                    ))}
+                <div id="projects" className="text-light p-5">
+                    <h1 id="projectsTitle">Welcome back, {user.username}!</h1>
+                    <div className="projectsContainer">
+                        {projects.map((project, index) => (
+                            <Link to={`/project/${project._id}`} key={index}>
+                                <ProjectCard key={index} project={project} />
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </>
         );
@@ -78,18 +93,20 @@ const LandingPage = () => {
       for (let i = 0; i < 20; i++) {
         const projectId = i.toString();
         const projectName = "Project " + i;
-        const projectImage = "https://via.placeholder.com/150";
+        const projectImage = "./placeholder2.png";
         const projectAuthor = "Author " + i;
         projects.push({ _id: projectId, name: projectName, image: projectImage, author: projectAuthor });
     }
 
       return (
       <>
-        <div className="text-light bg-dark p-5">
-            <h1>Welcome!</h1>
-            {projects.map((project, index) => (
-                <ProjectCard key={index} project={project} />
-            ))}
+        <div id="projects" className="text-light p-5">
+            <h1 id="projectsTitle">Community Projects</h1>
+            <div className="projectsContainer">
+                {projects.map((project, index) => (
+                    <ProjectCard key={index} project={project} />
+                ))}
+            </div>
         </div>
 
       </>
