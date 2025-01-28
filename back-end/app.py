@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import logging
 
+logging.basicConfig(level=logging.WARNING)
+
 # Load environment variables from .env file
 load_dotenv()
 
