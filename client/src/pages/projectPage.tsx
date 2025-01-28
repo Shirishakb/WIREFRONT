@@ -16,7 +16,7 @@ const ProjectPage = () => {
     const project: Project = {
         _id: projectId,
         name: "Project " + projectId,
-        image: "https://via.placeholder.com/150",
+        image: "./placeholder2.png",
         author: "Author " + projectId,
     };
 
@@ -26,20 +26,22 @@ const ProjectPage = () => {
     for (let i = 0; i < 5; i++) {
         const pageId = i.toString();
         const pageName = "Page " + i;
-        const pageImage = "https://via.placeholder.com/150";
+        const pageImage = "./placeholder2.png";
         const pageWidth = Math.floor(Math.random() * 1920);
         const pageHeight = Math.floor(Math.random() * 1080);
         pages.push({ _id: pageId, name: pageName, image: pageImage, width: pageWidth, height: pageHeight });
     }
 
     return (
-        <div>
-            <h1>{project.name}</h1>
-            {pages.map((page, index) => (
-                <Link to={`/pageeditor/${page._id}`} key={index}>
-                    <PageCard key={index} page={page} />
-                </Link>
-            ))}
+        <div id="projectPages" className="text-light p-5">
+            <h1 id="pagesTitle">{project.name}</h1>
+            <div className="pagesContainer">
+                {pages.map((page, index) => (
+                    <Link to={`/pageeditor/${page._id}`} key={index}>
+                        <PageCard key={index} page={page} />
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 };
