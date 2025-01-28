@@ -22,10 +22,40 @@ const AppNavbar = () => {
               {/* if user is logged in show saved books and logout */}
               {Auth.loggedIn() ? (
                 <>
+
+                  <button onClick={ () => {
+                    const projectName = prompt('Enter the name of your project');
+
+                    if (projectName) {
+                      fetch('/api/project', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          authorization: `Bearer ${Auth.getToken()}`,
+                        },
+                        body: JSON.stringify({ name: projectName }),
+                      }).then(async (r:any) => {
+
+                        if (!r.ok) {
+                          const errorData = await r.json();
+                          console.log('Failed to create project', errorData);
+                          return;
+                        }
+
+                        const data = await r.json();
+                        console.log('Created project', data);
+
+                        window.location.href = `/project/${data.projectId}`;
+
+                      });
+                    }
+                  }}>New Project</button>
+
                   <Nav.Link as={Link} to='/projects'>
                     See Your Projects
                   </Nav.Link>
                   <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
+
                 </>
               ) : (
                 <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>
