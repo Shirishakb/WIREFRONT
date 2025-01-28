@@ -34,18 +34,24 @@ def signup():
     
     return jsonify({"msg": "User created"}), 201
 
-
 # Login route
 @auth_bp.route("/auth/login", methods=["POST"])
 def login():
     data = request.json
-    user = users.find_one({"username": data["username"]})
+    user = users.find_one({"email": data["email"]})
     
     # Check if user exists and password matches
     if not user or not verify_password(data["password"], user["password"]):
         return jsonify({"msg": "Invalid credentials"}), 401
 
-    # Create a JWT token for the user
-    access_token = create_access_token(identity=str(user["_id"]))
+    # Create an access token
+    access_token = create_access_token(
+        identity=str(user["_id"]),  # Use the user's ID as the identity
+        additional_claims={
+            "email": user["email"],
+            "username": user["username"]
+        }
+    )
     
     return jsonify(access_token=access_token), 200
+
