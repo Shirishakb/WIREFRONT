@@ -5,7 +5,7 @@ const createComponent = async (pageId: string, compType: string, compSet: string
     try {
         const response = await fetch(`/api/comp`,
             {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,

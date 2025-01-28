@@ -73,7 +73,7 @@ const createPage = async (projectId: string, pageName: string, pageWidth: number
 
         const response = await fetch(`/api/page`,
             {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,

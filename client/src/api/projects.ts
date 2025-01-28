@@ -83,7 +83,7 @@ const createProject = async (userId: string, projectName: string) => {
     try {
         const response = await fetch(`/api/project`,
             {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
