@@ -10,28 +10,26 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pymongo import MongoClient
 
-# Connect to MongoDB and specify the database and collection
-client = MongoClient("your_mongodb_uri")
-projects = client["WIREFRONT"]["projects"]  # Use the WIREFRONT database
 
 project_bp = Blueprint("project_bp", __name__)
 
 
-@project_bp.route("/api/projects/user", methods=["GET"])  # Changed route to avoid conflict
-@jwt_required()
-def get_user_projects():
-    user_id = get_jwt_identity()
-    all_projects_user = list(projects.find({"userId": user_id}))
-    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects_user])
 
+# Create a new project
+@project_bp.route("/api/project", methods=["POST"])
+@jwt_required()
+def create_project():
+    data = request.json
+    user_id = get_jwt_identity()
+    data["userId"] = user_id
+    result = projects.insert_one(data)
+    return jsonify({"msg": "Project created", "projectId": str(result.inserted_id)})
 
 
 # Get all projects
 @project_bp.route("/api/project", methods=["GET"])
 def get_all_projects():
-
     all_projects = list(projects.find({}))
-
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
 
