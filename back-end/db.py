@@ -37,15 +37,15 @@ component_data = {
 }
 
 # Inserting data into the collections
-users.insert_one(user_data)  # Insert a single user
-projects.insert_one(project_data)  # Insert a single project
-pages.insert_one(page_data)  # Insert a single page
-components.insert_one(component_data)  # Insert a single component
+#users.insert_one(user_data)  # Insert a single user
+#projects.insert_one(project_data)  # Insert a single project
+#pages.insert_one(page_data)  # Insert a single page
+#omponents.insert_one(component_data)  # Insert a single component
 
 # Example query to fetch all users to verify insertion
-users_data = list(users.find())
-print("Users:", users_data)
+#users_data = list(users.find())
+#print("Users:", users_data)
 
 # Example query to fetch all projects to verify insertion
-projects_data = list(projects.find())
-print("Projects:", projects_data)
+#projects_data = list(projects.find())
+#print("Projects:", projects_data)
