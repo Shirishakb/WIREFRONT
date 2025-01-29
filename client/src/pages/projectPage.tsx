@@ -1,7 +1,7 @@
 import PageCard from '../components/pageCard';
 import { Link, useParams } from 'react-router-dom';
 
-import Auth from '../utils/auth';
+//import Auth from '../utils/auth';
 
 interface Project {
     _id: string;
@@ -35,7 +35,7 @@ const ProjectPage = () => {
     }
 
     return (
-        <div>
+        /*<div>
             <h1>{project.name}</h1>
 
             <button onClick={ async () => {
@@ -71,7 +71,7 @@ const ProjectPage = () => {
                     <PageCard key={index} page={page} />
                 </Link>
             ))}
-
+         */
         <div id="projectPages" className="text-light p-5">
             <h1 id="pagesTitle">{project.name}</h1>
             <div className="pagesContainer">

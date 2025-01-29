@@ -1,4 +1,5 @@
 import ProjectCard from "../components/projectCard";
+import { getProjects, getUserProjects } from "../api/projects";
 import { Link } from "react-router-dom";
 import Auth from "../utils/auth.js";
 
@@ -12,8 +13,8 @@ interface Project {
     name: string;
     author: string;
 }
-
-/*interface User {
+/*
+interface User {
     _id: string;
     username: string;
     email: string;
@@ -28,55 +29,42 @@ const LandingPage = () => {
 
     const loggedIn: boolean = Auth.loggedIn();
 
-    const getProjects = async () => {
-        const response = await fetch("/api/project", {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("id_token")}`,
-            },
-        });
-        const data = await response.json();
-        setProjects(data);
-    };
-
     useEffect(() => {
+        const projectFiller = async () => {
+            if (loggedIn) {
+                const data:Project[] = await getUserProjects(Auth.getToken());
+                setProjects(data);
+            } else {
+                const data:Project[] = await getProjects();
+                setProjects(data);
+            }
+        }
 
-       if (loggedIn) getProjects();
+        projectFiller();
     }, []);
-
-    return (
-        <div className="text-light bg-dark p-5">
-            {projects.map((project, index) => (
-                <Link to={`/project/${project.projectId}`} key={index}>
-                <ProjectCard key={index} project={project} />
-                </Link>
-            ))}
-        </div>
-    );
-
-    /*
 
     if (loggedIn) {
 
         // Mock data for user
-        const user: User = {
+        /*const user: User = {
             _id: "1", 
             username: "admin",
             email: "admin@admin.com",
-        }
+        };*/
 
         // Mock data for projects
         // This will be replaced with a GetUserProjects call
-        for (let i = 0; i < 5; i++) {
+        /*for (let i = 0; i < 5; i++) {
             const projectId = i.toString();
             const projectName = "Project " + i;
             const projectImage = "./placeholder2.png";
-            projects.push({ _id: projectId, name: projectName, image: projectImage, author: '' });
-        }
+            projects.push({ _id: projectId, projectName: projectName, projectId: projectId, name: projectName, image: projectImage, author: '' });
+        }*/
 
         return (
             <>
                 <div id="projects" className="text-light p-5">
-                    <h1 id="projectsTitle">Welcome back, {user.username}!</h1>
+                    <h1 id="projectsTitle">Welcome back, insertusername!</h1>
                     <div className="projectsContainer">
                         {projects.map((project, index) => (
                             <Link to={`/project/${project._id}`} key={index}>
@@ -90,13 +78,13 @@ const LandingPage = () => {
     } else {
       // Mock data for projects
       // This will be replaced with a GetAllProjects call
-      for (let i = 0; i < 20; i++) {
-        const projectId = i.toString();
-        const projectName = "Project " + i;
-        const projectImage = "./placeholder2.png";
-        const projectAuthor = "Author " + i;
-        projects.push({ _id: projectId, name: projectName, image: projectImage, author: projectAuthor });
-    }
+      /*for (let i = 0; i < 20; i++) {
+            const projectId = i.toString();
+            const projectName = "Project " + i;
+            const projectImage = "./placeholder2.png";
+            const projectAuthor = "Author " + i;
+            projects.push({ _id: projectId, projectName: projectName, projectId: projectId, name: projectName, image: projectImage, author: projectAuthor });
+        }*/
 
       return (
       <>
@@ -112,8 +100,6 @@ const LandingPage = () => {
       </>
       );
     }
-
-    */
 
 };
 
