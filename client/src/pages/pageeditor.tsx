@@ -68,10 +68,10 @@ const PageEditor = () => {
     }
   };
 
-  const removeComponentFromChosenList = (component: Component) => {
+  /*const removeComponentFromChosenList = (component: Component) => {
     setChosenComponents((prev) => prev.filter((comp) => comp !== component));
     setRemovedComponents((prev) => [...prev, component]);
-  };
+  };*/
 
   const restoreComponent = (id: string) => {
     const componentToRestore = removedComponents.find((comp) => comp.id === id);
@@ -194,7 +194,7 @@ const PageEditor = () => {
                       saveComponentProperties(component, content);
                     }}
                   >
-                    <textarea type="text" placeholder="Text for component..." name="content" />
+                    <textarea placeholder="Text for component..." name="content" />
                     <button type="submit">Save</button>
                   </form>
                 ) : (
