@@ -33,7 +33,7 @@ const LandingPage = () => {
     useEffect(() => {
         const projectFiller = async () => {
             if (loggedIn) {
-                const data:Project[] = await getUserProjects(Auth.getToken());
+                const data:Project[] = await getUserProjects();
                 setProjects(data);
             } else {
                 const data:Project[] = await getProjects();
@@ -64,7 +64,7 @@ const LandingPage = () => {
             projects.push({ _id: projectId, projectName: projectName, projectId: projectId, name: projectName, image: projectImage, author: '' });
         }*/
         const projectsComponent = projects.map((project, index) => (
-            <Link to={`/project/${project._id}`} key={index}>
+            <Link to={`/project/${project.projectId}`} key={index}>
                 <ProjectCard key={index} project={project} />
             </Link>
         ))

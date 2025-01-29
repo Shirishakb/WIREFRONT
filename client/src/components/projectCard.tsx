@@ -6,14 +6,17 @@ interface Project {
 }
 
 const ProjectCard = ({ project }: { project: Project }) => {
-  return (
+  if (!project.image) {
+    project.image = "./public/placeholder2.png";
+  }
 
+  return (
     <div className="projectCard bg-dark">
         <img className="projectImg" src={project.image} alt={project.projectName} />
         <h3 className="projectH3">{project.projectName}</h3>
         <p className="projectP">{project.author}</p>
     </div>
-    );
+  );
 }
 
 export default ProjectCard;

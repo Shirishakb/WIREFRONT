@@ -3,17 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from db import projects
 from bson.objectid import ObjectId
 
-project_bp = Blueprint("project", __name__)
-
-# Create a new project
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from pymongo import MongoClient
-
-
 project_bp = Blueprint("project_bp", __name__)
-
-
 
 # Create a new project
 @project_bp.route("/api/project", methods=["POST"])
@@ -32,10 +22,25 @@ def get_all_projects():
     all_projects = list(projects.find({}))
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
+# Get a all project by userID
+@project_bp.route("/api/project/user", methods=["GET"])  
+@jwt_required()
+def get_project_user():
+    user_id = get_jwt_identity()
+    project_list = projects.find({"userId": user_id})
 
+    if not project_list:
+        return jsonify({"msg": "Project not found"}), 404
 
+    return jsonify([
+        {
+            "projectId": str(project["_id"]),
+            "projectName": project["projectName"]
+        }
+        for project in project_list
+    ])
 
-# Get a specific project by ID
+# Get a specific project by project ID
 @project_bp.route("/api/project/<projectId>", methods=["GET"])  
 @jwt_required()
 def get_project(projectId):
@@ -46,8 +51,11 @@ def get_project(projectId):
         return jsonify({"msg": "Invalid project ID"}), 400
 
     project = projects.find_one({"_id": ObjectId(projectId)})
-    return jsonify({"projectId": str(project["_id"]), "projectName": project["projectName"]})
 
+    if not project:
+        return jsonify({"msg": "Project not found"}), 404
+
+    return jsonify({"projectId": str(project["_id"]),"projectName": project["projectName"]})
 
 # Update a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["PUT"])

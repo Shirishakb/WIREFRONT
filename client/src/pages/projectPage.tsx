@@ -60,8 +60,12 @@ const ProjectPage = () => {
         const pageHeight = Math.floor(Math.random() * 1080);
         pages.push({ _id: pageId, name: pageName, image: pageImage, width: pageWidth, height: pageHeight });
     }*/
+    if (!project) {
+        return <div>Loading...</div>;
+    }
+
    const pagesComponent = pages.map((page, index) => (
-        <Link to={`/pageeditor/${page._id}`} key={index}>
+        <Link to={`/pageeditor/${page.pageId}`} key={index}>
             <PageCard key={index} page={page} />
         </Link>
     ));
