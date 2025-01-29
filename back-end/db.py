@@ -13,6 +13,7 @@ pages = client["WIREFRONT"]["pages"]
 components = client["WIREFRONT"]["components"]
 
 # Example data to insert into each collection
+
 user_data = {
     "username": "new_user",
     "password": "hashed_password_here",  # Ensure to hash passwords for security
@@ -35,17 +36,16 @@ component_data = {
     "componentType": "text",
     "content": "This is a text component"
 }
-
 # Inserting data into the collections
-users.insert_one(user_data)  # Insert a single user
-projects.insert_one(project_data)  # Insert a single project
-pages.insert_one(page_data)  # Insert a single page
-components.insert_one(component_data)  # Insert a single component
+#users.insert_one(user_data)  # Insert a single user
+#projects.insert_one(project_data)  # Insert a single project
+#pages.insert_one(page_data)  # Insert a single page
+#omponents.insert_one(component_data)  # Insert a single component
 
 # Example query to fetch all users to verify insertion
-users_data = list(users.find())
-print("Users:", users_data)
+#users_data = list(users.find())
+#print("Users:", users_data)
 
 # Example query to fetch all projects to verify insertion
-projects_data = list(projects.find())
-print("Projects:", projects_data)
+#projects_data = list(projects.find())
+#print("Projects:", projects_data)

@@ -35,8 +35,8 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
         throw new Error('something went wrong!');
       }
 
-      const { token } = await response.json();
-      Auth.login(token);
+      const { access_token } = await response.json();
+      Auth.login(access_token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);

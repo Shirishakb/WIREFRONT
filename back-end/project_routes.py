@@ -6,29 +6,24 @@ from bson.objectid import ObjectId
 project_bp = Blueprint("project", __name__)
 
 # Create a new project
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from pymongo import MongoClient
+
+
+project_bp = Blueprint("project_bp", __name__)
+
+
+
+# Create a new project
 @project_bp.route("/api/project", methods=["POST"])
 @jwt_required()
 def create_project():
-    user_id = get_jwt_identity()
     data = request.json
-    project = {
-        "userId": user_id,
-        "projectName": data.get("projectName", "Untitled Project")
-    }
-    project_id = projects.insert_one(project).inserted_id
-    return jsonify({"projectId": str(project_id)})
-
-
-# Get all projects for a specific user
-@project_bp.route("/api/project/userId/<userId>", methods=["GET"])
-def get_all_projects_specific_user():
-    try: 
-        if not ObjectId.is_valid("userId"):
-            raise Exception("Invalid user ID")
-    except:
-        return jsonify({"msg": "Invalid user ID"}), 400
-    all_projects = list(projects.find({}))
-    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+    user_id = get_jwt_identity()
+    data["userId"] = user_id
+    result = projects.insert_one(data)
+    return jsonify({"msg": "Project created", "projectId": str(result.inserted_id)})
 
 
 # Get all projects
@@ -38,8 +33,11 @@ def get_all_projects():
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
 
+
+
 # Get a specific project by ID
-@project_bp.route("/api/project/<projectId>", methods=["GET"])
+@project_bp.route("/api/project/<projectId>", methods=["GET"])  
+@jwt_required()
 def get_project(projectId):
     try:
         if not ObjectId.is_valid(projectId):
@@ -53,6 +51,7 @@ def get_project(projectId):
 
 # Update a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["PUT"])
+@jwt_required()
 def update_project(projectId):
     try:
         if not ObjectId.is_valid(projectId):

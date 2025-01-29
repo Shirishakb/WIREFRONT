@@ -1,15 +1,17 @@
 interface Project {
+  _id: string;
   image: string;
-  name: string;
+  projectName: string;
   author: string;
 }
 
 const ProjectCard = ({ project }: { project: Project }) => {
   return (
-    <div className="project-card">
-        <img src={project.image} alt={project.name} />
-        <h3>{project.name}</h3>
-        <p>{project.author}</p>
+
+    <div className="projectCard bg-dark">
+        <img className="projectImg" src={project.image} alt={project.projectName} />
+        <h3 className="projectH3">{project.projectName}</h3>
+        <p className="projectP">{project.author}</p>
     </div>
     );
 }

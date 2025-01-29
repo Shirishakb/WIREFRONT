@@ -26,7 +26,7 @@ const getPages = async (projectId: string) => {
     }
 };
 
-// GET Pages by projectId
+// GET Page by pageId
 const getPageById = async (pageId: string) => {
   try {
       const response = await fetch(`/api/page/id/${pageId}`,
@@ -73,7 +73,7 @@ const createPage = async (projectId: string, pageName: string, pageWidth: number
 
         const response = await fetch(`/api/page`,
             {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,

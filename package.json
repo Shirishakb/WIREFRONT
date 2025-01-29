@@ -5,7 +5,7 @@
   "scripts": {
     "start": "python back-end/app.py",
     "seed": "cd back-end && npm run seed",
-    "develop": "concurrently \"cd back-end && npm run watch\" \"cd client && npm run dev\"",
+    "develop": "concurrently \"python back-end/app.py\" \"cd client && npm run dev\"",
     "install": "cd client && npm i",
     "build": "concurrently \"pip install -r back-end/requirements.txt\" \"cd client && npm run build\"",
     "render-build": "npm install && npm run build",
@@ -23,7 +23,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   },
   "dependencies": {
     "@types/react-rnd": "^7.4.4",

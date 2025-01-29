@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
+import {createProject} from '../api/projects';
 import SignUpForm from './signupform';
 import LoginForm from './LoginForm';
 import Auth from '../utils/auth';
@@ -8,6 +9,7 @@ import Auth from '../utils/auth';
 const AppNavbar = () => {
   // set modal display state
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -22,10 +24,24 @@ const AppNavbar = () => {
               {/* if user is logged in show saved books and logout */}
               {Auth.loggedIn() ? (
                 <>
+
+                  <button onClick={ async () => {
+                    const projectName = prompt('Enter the name of your project');
+
+                    if (projectName) {
+                      const project = await createProject(projectName);
+                      console.log("project: ", project);
+                      if (project) {
+                        navigate(`/project/${project.projectId}`);
+                      }
+                    }
+                  }}>New Project</button>
+
                   <Nav.Link as={Link} to='/projects'>
                     See Your Projects
                   </Nav.Link>
                   <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
+
                 </>
               ) : (
                 <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>

@@ -1,10 +1,12 @@
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './App.css'
 
 import App from './App.jsx'
 import LandingPage from './pages/LandingPage'
 import PageEditor from './pages/pageeditor'
+import ProjectPage from './pages/projectPage'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: '/pageeditor/:pageId',
         element: <PageEditor />
+      },
+      {
+        path: '/project/:projectId',
+        element: <ProjectPage />
       }
     ]
   }

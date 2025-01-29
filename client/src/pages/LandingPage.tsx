@@ -1,73 +1,122 @@
-import { createComponent, getComponents, getComponentById, updateComponent, deleteComponent } from '../api/components.js';
-import { getPages, getPageById, createPage, updatePage, deletePage } from '../api/pages.js';
-import { getProjects, getUserProjects, getProjectById, createProject, updateProject, deleteProject } from '../api/projects.js';
+import ProjectCard from "../components/projectCard";
+import { getProjects, getUserProjects } from "../api/projects";
+import { Link, useNavigate } from "react-router-dom";
+import Auth from "../utils/auth.js";
+import { createProject } from "../api/projects";
+
+import { useEffect, useState } from "react";
+
+interface Project {
+    _id: string;
+    projectName: string;
+    projectId: string;
+    image: string;
+    name: string;
+    author: string;
+}
+/*
+interface User {
+    _id: string;
+    username: string;
+    email: string;
+}*/
 
 const LandingPage = () => {
 
-  const projectName = "My Project";
-  const userId = "1";
-  const randomFunction = async () => {
-    const projectData = await createProject( userId, projectName );
-    console.log( projectData );
-    const allProjects = await getProjects();
-    console.log( allProjects );
-    const userProjects = await getUserProjects( userId );
-    console.log( userProjects );
-    const projectGet = await getProjectById( projectData.id );
-    console.log( projectGet );
-    const projectUpdate = await updateProject( projectData.id, projectName );
-    console.log( projectUpdate );
+    const navigate = useNavigate();
+    //const projects: Project[] = []
 
-    const pageName = "Home";
-    const pageWidth = 1920;
-    const pageHeight = 1080;
-    const projectId = projectData.id;
-    
-    const pageData = await createPage( projectId, pageName, pageWidth, pageHeight );
-    console.log( pageData );
-    const allPages = await getPages( projectId );
-    console.log( allPages );
-    const pageGet = await getPageById( pageData.id );
-    console.log( pageGet );
-    const pageUpdate = await updatePage( pageData.id, pageName, pageWidth, pageHeight );
-    console.log( pageUpdate );
+    const [ projects, setProjects ] = useState<Project[]>([]);
 
-    const pageId = pageData.id;
-    const compType = "TEXTBOX";
-    const compStyle = "StyleSetA";
-    const compWidth = 100;
-    const compHeight = 100;
-    const compX = 500;
-    const compY = 500;
+    const loggedIn: boolean = Auth.loggedIn();
 
-    const componentData = await createComponent( pageId, compType, compStyle );
-    console.log( componentData );
-    const allComponents = await getComponents( pageId );
-    console.log( allComponents );
-    const componentGet = await getComponentById( componentData.id );
-    console.log( componentGet );
-    const componentUpdate = await updateComponent( componentData.id, compType, compStyle, compWidth, compHeight, compX, compY );
-    console.log( componentUpdate );
+    useEffect(() => {
+        const projectFiller = async () => {
+            if (loggedIn) {
+                const data:Project[] = await getUserProjects(Auth.getToken());
+                setProjects(data);
+            } else {
+                const data:Project[] = await getProjects();
+                setProjects(data);
+            }
+        }
 
-    const componentDelete = await deleteComponent( componentData.id );
-    console.log( componentDelete );
-    const pageDelete = await deletePage( pageData.id );
-    console.log( pageDelete );
-    const projectDelete = await deleteProject( projectData.id );
-    console.log( projectDelete );
-  }
+        projectFiller();
+    }, []);
 
-  randomFunction();
+    console.log("projects:", projects);
 
+    if (loggedIn) {
 
-    return (
-    <>
-      <div className="text-light bg-dark p-5">
-          <h1>Welcome!</h1>
-      </div>
+        // Mock data for user
+        /*const user: User = {
+            _id: "1", 
+            username: "admin",
+            email: "admin@admin.com",
+        };*/
 
-    </>
-    );
+        // Mock data for projects
+        // This will be replaced with a GetUserProjects call
+        /*for (let i = 0; i < 5; i++) {
+            const projectId = i.toString();
+            const projectName = "Project " + i;
+            const projectImage = "./placeholder2.png";
+            projects.push({ _id: projectId, projectName: projectName, projectId: projectId, name: projectName, image: projectImage, author: '' });
+        }*/
+        const projectsComponent = projects.map((project, index) => (
+            <Link to={`/project/${project._id}`} key={index}>
+                <ProjectCard key={index} project={project} />
+            </Link>
+        ))
+
+        return (
+            <>
+                <div id="projects" className="text-light p-5">
+                    <h1 id="projectsTitle">Welcome back, insertusername!</h1>
+                    <div className="projectsContainer">
+                        {projects.length > 0 ? projectsComponent : <p>No projects found, please click 
+                            <button onClick={ async () => {
+                                const projectName = prompt('Enter the name of your project');
+
+                                if (projectName) {
+                                    const project = await createProject(projectName);
+                                    console.log("project: ", project);
+                                    if (project) {
+                                        navigate(`/project/${project.projectId}`);
+                                    }
+                                }
+                            }}>here</button> to create one!</p>}
+                        {}
+                    </div>
+                </div>
+            </>
+        );
+    } else {
+      // Mock data for projects
+      // This will be replaced with a GetAllProjects call
+      /*for (let i = 0; i < 20; i++) {
+            const projectId = i.toString();
+            const projectName = "Project " + i;
+            const projectImage = "./placeholder2.png";
+            const projectAuthor = "Author " + i;
+            projects.push({ _id: projectId, projectName: projectName, projectId: projectId, name: projectName, image: projectImage, author: projectAuthor });
+        }*/
+
+      return (
+      <>
+        <div id="projects" className="text-light p-5">
+            <h1 id="projectsTitle">Community Projects</h1>
+            <div className="projectsContainer">
+                {projects.map((project, index) => (
+                    <ProjectCard key={index} project={project} />
+                ))}
+            </div>
+        </div>
+
+      </>
+      );
+    }
+
 };
 
 export default LandingPage;
