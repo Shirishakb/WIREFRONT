@@ -1,8 +1,6 @@
 import PageCard from '../components/pageCard';
 import { Link, useParams } from 'react-router-dom';
 
-//import Auth from '../utils/auth';
-
 interface Project {
     _id: string;
     image: string;
@@ -35,43 +33,6 @@ const ProjectPage = () => {
     }
 
     return (
-        /*<div>
-            <h1>{project.name}</h1>
-
-            <button onClick={ async () => {
-                // Add a new page
-                const request = await fetch('/api/page', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        authorization: `Bearer ${Auth.getToken()}`,
-                    },
-                    body: JSON.stringify({
-                        projectId: projectId,
-                    }),
-                })
-
-                if (!request.ok) {
-                    throw new Error('Failed to add page');
-                }
-
-                const data = await request.json();
-
-                window.location.href = `/pageeditor/${data.pageId}`;
-            }}>
-
-                add page
-            </button>
-
-
-
-
-            {pages.map((page, index) => (
-                <Link to={`/pageeditor/${page._id}`} key={index}>
-                    <PageCard key={index} page={page} />
-                </Link>
-            ))}
-         */
         <div id="projectPages" className="text-light p-5">
             <h1 id="pagesTitle">{project.name}</h1>
             <div className="pagesContainer">
@@ -82,7 +43,6 @@ const ProjectPage = () => {
                 ))}
             </div>
         </div>
-    </div>
     );
 };
 
