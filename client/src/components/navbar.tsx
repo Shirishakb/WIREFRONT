@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
 import {createProject} from '../api/projects';
 import SignUpForm from './signupform';
@@ -9,6 +9,7 @@ import Auth from '../utils/auth';
 const AppNavbar = () => {
   // set modal display state
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -29,9 +30,9 @@ const AppNavbar = () => {
 
                     if (projectName) {
                       const project = await createProject(projectName);
-
+                      console.log("project: ", project);
                       if (project) {
-                        window.location.href = `/project/${project._id}`;
+                        navigate(`/project/${project.projectId}`);
                       }
                     }
                   }}>New Project</button>
