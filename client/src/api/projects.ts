@@ -1,14 +1,22 @@
 import auth from '../utils/auth';
 
+interface Project {
+  _id: string;
+  projectName: string;
+  projectId: string;
+  image: string;
+  name: string;
+  author: string;
+}
+
 // GET All Projects
-const getProjects = async () => {
+const getProjects = async ():  Promise<Project[] | []>=> {
     try {
         const response = await fetch(`/api/project`,
             {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    authorization: `Bearer ${auth.getToken()}`,
                 },
             }
         );
@@ -22,14 +30,14 @@ const getProjects = async () => {
       return data;
     } catch (err) {
       console.log('Error from data retrieval: ', err);
-      return null;
+      return [];
     }
 };
 
 // GET Projects by userId
-const getUserProjects = async (userId: string) => {
+const getUserProjects = async (token: string): Promise<Project[] | []> => {
     try {
-        const response = await fetch(`/api/project/${userId}`,
+        const response = await fetch(`/api/projects/${token}`,
             {
                 method: 'GET',
                 headers: {
@@ -48,12 +56,12 @@ const getUserProjects = async (userId: string) => {
       return data;
     } catch (err) {
       console.log('Error from data retrieval: ', err);
-      return null;
+      return [];
     }
 };
 
 // GET Projects by projectId
-const getProjectById = async (projectId: string) => {
+const getProjectById = async (projectId: string): Promise<Project | null> => {
   try {
       const response = await fetch(`/api/project/${projectId}`,
           {
@@ -79,7 +87,7 @@ const getProjectById = async (projectId: string) => {
 };
 
 // POST Project
-const createProject = async (userId: string, projectName: string) => {
+const createProject = async (projectName: string): Promise<Project | null> => {
     try {
         const response = await fetch(`/api/project`,
             {
@@ -88,8 +96,7 @@ const createProject = async (userId: string, projectName: string) => {
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
                 },
-                body: JSON.stringify({ 
-                  userId: userId,
+                body: JSON.stringify({
                   projectName: projectName
                 }),
             }
@@ -109,7 +116,7 @@ const createProject = async (userId: string, projectName: string) => {
 };
 
 // PUT Project
-const updateProject = async (projectId: string, projectName: string) => {
+const updateProject = async (projectId: string, projectName: string): Promise<Project | null> => {
     try {
         const response = await fetch(`/api/project/${projectId}`,
             {
@@ -138,7 +145,7 @@ const updateProject = async (projectId: string, projectName: string) => {
 };
 
 // DELETE Project
-const deleteProject = async (projectId: string) => {
+const deleteProject = async (projectId: string): Promise<Project | null> => {
     try {
         const response = await fetch(`/api/project/${projectId}`,
             {

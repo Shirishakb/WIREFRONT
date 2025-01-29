@@ -33,6 +33,8 @@ def get_all_projects():
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
 
+
+
 # Get a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["GET"])  
 @jwt_required()
