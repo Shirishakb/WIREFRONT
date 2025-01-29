@@ -1,17 +1,20 @@
 interface Page {
     _id: string;
     image: string;
-    name: string;
+    pageName: string;
     width: number;
     height: number;
   }
   
   const PageCard = ({ page }: { page: Page }) => {
-    console.log('pageImg', page.image);
+    if (!page.image) {
+      page.image = "../public/placeholder2.png";
+    }
+
     return (
       <div className="pageCard bg-dark">
-          <img className="pageImg" src={page.image} alt={page.name} />
-          <h3 className="pageH3">{page.name}</h3>
+          <img className="pageImg" src={page.image} alt={page.pageName} />
+          <h3 className="pageH3">{page.pageName}</h3>
       </div>
       );
   }
