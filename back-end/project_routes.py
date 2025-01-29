@@ -16,13 +16,32 @@ projects = client["WIREFRONT"]["projects"]  # Use the WIREFRONT database
 
 project_bp = Blueprint("project_bp", __name__)
 
-
-@project_bp.route("/api/projects/user", methods=["GET"])  # Changed route to avoid conflict
+@project_bp.route("/api/project", methods=["POST"])
 @jwt_required()
-def get_user_projects():
+def create_project():
     user_id = get_jwt_identity()
-    all_projects_user = list(projects.find({"userId": user_id}))
-    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects_user])
+    data = request.json
+
+    project_name = data.get("projectName", "Untitled Project")  # Allow naming the project
+
+    project = {
+        "userId": user_id,
+        "projectName": project_name
+    }
+    project_id = projects.insert_one(project).inserted_id
+
+    return jsonify({"projectId": str(project_id), "projectName": project_name})
+
+# Get all projects by user jwt token
+@project_bp.route("/api/project/user", methods=["GET"])
+@jwt_required()
+def get_all_projects():
+
+    all_projects = list(projects.find({
+        "userId": get_jwt_identity()
+        }))
+
+    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
 
 
@@ -33,6 +52,8 @@ def get_all_projects():
     all_projects = list(projects.find({}))
 
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+
+
 
 
 # Get a specific project by ID

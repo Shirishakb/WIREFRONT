@@ -43,6 +43,8 @@ const LandingPage = () => {
         projectFiller();
     }, []);
 
+    console.log("projects:", projects);
+
     if (loggedIn) {
 
         // Mock data for user

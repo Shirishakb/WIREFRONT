@@ -17,7 +17,6 @@ const getProjects = async ():  Promise<Project[] | []>=> {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    authorization: `Bearer ${auth.getToken()}`,
                 },
             }
         );
