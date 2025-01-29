@@ -26,7 +26,7 @@ const getPages = async (projectId: string) => {
     }
 };
 
-// GET Pages by projectId
+// GET Page by pageId
 const getPageById = async (pageId: string) => {
   try {
       const response = await fetch(`/api/page/id/${pageId}`,
