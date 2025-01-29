@@ -6,40 +6,45 @@ from bson.objectid import ObjectId
 project_bp = Blueprint("project", __name__)
 
 # Create a new project
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from pymongo import MongoClient
+
+# Connect to MongoDB and specify the database and collection
+client = MongoClient("your_mongodb_uri")
+projects = client["WIREFRONT"]["projects"]  # Use the WIREFRONT database
+
+project_bp = Blueprint("project_bp", __name__)
+
 @project_bp.route("/api/project", methods=["POST"])
 @jwt_required()
 def create_project():
     user_id = get_jwt_identity()
     data = request.json
+
+    project_name = data.get("projectName", "Untitled Project")  # Allow naming the project
+
     project = {
         "userId": user_id,
-        "projectName": data.get("projectName", "Untitled Project")
+        "projectName": project_name
     }
     project_id = projects.insert_one(project).inserted_id
-    return jsonify({"projectId": str(project_id)})
 
+    return jsonify({"projectId": str(project_id), "projectName": project_name})
 
-# Get all projects for a specific user
-@project_bp.route("/api/project/userId/<userId>", methods=["GET"])
-def get_all_projects_specific_user():
-    try: 
-        if not ObjectId.is_valid("userId"):
-            raise Exception("Invalid user ID")
-    except:
-        return jsonify({"msg": "Invalid user ID"}), 400
-    all_projects = list(projects.find({}))
-    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
-
-
-# Get all projects
+# Get all projects by user jwt token
 @project_bp.route("/api/project", methods=["GET"])
+@jwt_required()
 def get_all_projects():
-    all_projects = list(projects.find({}))
+    all_projects = list(projects.find({
+        "userId": get_jwt_identity()
+    }))
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
 
 
 # Get a specific project by ID
-@project_bp.route("/api/project/<projectId>", methods=["GET"])
+@project_bp.route("/api/project/<projectId>", methods=["GET"])  
+@jwt_required()
 def get_project(projectId):
     try:
         if not ObjectId.is_valid(projectId):
@@ -53,6 +58,7 @@ def get_project(projectId):
 
 # Update a specific project by ID
 @project_bp.route("/api/project/<projectId>", methods=["PUT"])
+@jwt_required()
 def update_project(projectId):
     try:
         if not ObjectId.is_valid(projectId):
