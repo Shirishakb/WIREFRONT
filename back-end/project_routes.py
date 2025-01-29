@@ -33,13 +33,27 @@ def create_project():
     return jsonify({"projectId": str(project_id), "projectName": project_name})
 
 # Get all projects by user jwt token
-@project_bp.route("/api/project", methods=["GET"])
+@project_bp.route("/api/project/user", methods=["GET"])
 @jwt_required()
 def get_all_projects():
+
     all_projects = list(projects.find({
         "userId": get_jwt_identity()
-    }))
+        }))
+
     return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+
+
+
+# Get all projects
+@project_bp.route("/api/project", methods=["GET"])
+def get_all_projects():
+
+    all_projects = list(projects.find({}))
+
+    return jsonify([{"projectId": str(p["_id"]), "projectName": p["projectName"]} for p in all_projects])
+
+
 
 
 # Get a specific project by ID
