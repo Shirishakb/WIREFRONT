@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
+import {createProject} from '../api/projects';
 import SignUpForm from './signupform';
 import LoginForm from './LoginForm';
 import Auth from '../utils/auth';
@@ -23,31 +24,15 @@ const AppNavbar = () => {
               {Auth.loggedIn() ? (
                 <>
 
-                  <button onClick={ () => {
+                  <button onClick={ async () => {
                     const projectName = prompt('Enter the name of your project');
 
                     if (projectName) {
-                      fetch('/api/project', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          authorization: `Bearer ${Auth.getToken()}`,
-                        },
-                        body: JSON.stringify({ name: projectName }),
-                      }).then(async (r:any) => {
+                      const project = await createProject(projectName);
 
-                        if (!r.ok) {
-                          const errorData = await r.json();
-                          console.log('Failed to create project', errorData);
-                          return;
-                        }
-
-                        const data = await r.json();
-                        console.log('Created project', data);
-
-                        window.location.href = `/project/${data.projectId}`;
-
-                      });
+                      if (project) {
+                        window.location.href = `/project/${project._id}`;
+                      }
                     }
                   }}>New Project</button>
 

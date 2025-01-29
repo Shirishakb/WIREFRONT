@@ -87,7 +87,7 @@ const getProjectById = async (projectId: string): Promise<Project | null> => {
 };
 
 // POST Project
-const createProject = async (userId: string, projectName: string): Promise<Project | null> => {
+const createProject = async (projectName: string): Promise<Project | null> => {
     try {
         const response = await fetch(`/api/project`,
             {
@@ -96,8 +96,7 @@ const createProject = async (userId: string, projectName: string): Promise<Proje
                     'Content-Type': 'application/json',
                     authorization: `Bearer ${auth.getToken()}`,
                 },
-                body: JSON.stringify({ 
-                  userId: userId,
+                body: JSON.stringify({
                   projectName: projectName
                 }),
             }
