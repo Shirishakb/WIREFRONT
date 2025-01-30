@@ -41,7 +41,8 @@ def get_components_by_page(pageId):
             "componentWidth": c["componentWidth"],
             "componentHeight": c["componentHeight"],
             "componentXPosition": c["componentXPosition"],
-            "componentYPosition": c["componentYPosition"]
+            "componentYPosition": c["componentYPosition"],
+            "properties": c.get("properties", {})
         } 
         for c in all_components
     ])

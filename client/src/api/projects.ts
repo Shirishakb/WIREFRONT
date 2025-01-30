@@ -35,9 +35,9 @@ const getProjects = async ():  Promise<Project[] | []>=> {
 };
 
 // GET Projects by userId
-const getUserProjects = async (token: string): Promise<Project[] | []> => {
+const getUserProjects = async (): Promise<Project[] | []> => {
     try {
-        const response = await fetch(`/api/projects/${token}`,
+        const response = await fetch(`/api/project/user`,
             {
                 method: 'GET',
                 headers: {
