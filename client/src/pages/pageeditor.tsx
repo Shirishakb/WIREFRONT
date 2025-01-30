@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd'; // Using react-rnd for resizing and dragging
-import { useParams ,useLocation, useNavigate} from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getPageById, updatePage } from '../api/pages';
 import { getComponents, createComponent, deleteComponent, updateComponent } from '../api/components';
 import { COMPONENT_TYPES } from '../constants';
@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
-
 
 interface Component {
   _id?: string;
@@ -24,7 +23,7 @@ const DEFAULT_POSITION_OFFSET = 50; // Offset for new components to avoid overla
 const PageEditor = () => {
   const { pageId } = useParams();
   const location = useLocation();
-  const [page, setPage] = useState<{ pageName: string; _id: string; width: number; height: number,projectId:string } | null>(null);
+  const [page, setPage] = useState<{ pageName: string; _id: string; width: number; height: number, projectId: string } | null>(null);
   const [newPageName, setNewPageName] = useState<string>('');
   const [isEditingPageName, setIsEditingPageName] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -36,20 +35,12 @@ const PageEditor = () => {
   const [showModal, setShowModal] = useState(false); // To control modal visibility
   const [optionValue, setOptionValue] = useState<string>(''); // The new value for the option
 
-
-
   useEffect(() => {
     if (pageId) {
       fetchPage(pageId);
       fetchComponents();
-
-
-
-
     }
   }, [pageId]);
-  
- 
 
   // Use page name from location state if available
   useEffect(() => {
@@ -58,8 +49,7 @@ const PageEditor = () => {
     }
   }, [location.state, pageId]);
 
-
-// Fetch details from API"
+  // Fetch details from API"
   const fetchPage = async (pageId: string) => {
     const data = await getPageById(pageId);
     if (data) {
@@ -68,23 +58,20 @@ const PageEditor = () => {
   };
 
   const handleSavePageName = async () => {
-  
-      if (page && pageId && newPageName)
-      {
-        await updatePage(pageId, { pageName: newPageName });
+    if (page && pageId && newPageName) {
+      await updatePage(pageId, { pageName: newPageName });
 
-        setPage({ ...page, pageName: newPageName });
+      setPage({ ...page, pageName: newPageName });
 
-        setIsEditingPageName(false);
-      }
-
-
+      setIsEditingPageName(false);
+    }
   };
 
   const handleCancelEdit = () => {
     setNewPageName('');
     setIsEditingPageName(false);
   };
+
   const fetchComponents = async () => {
     try {
       const data = await getComponents(pageId || '');
@@ -101,9 +88,7 @@ const PageEditor = () => {
           size: { width: comp.componentWidth, height: comp.componentHeight },
         });
       }
-
       setComponents(comps);
-
     } catch (error) {
       console.error('Error fetching components:', error);
     }
@@ -116,7 +101,6 @@ const PageEditor = () => {
       position: { x: DEFAULT_POSITION_OFFSET, y: DEFAULT_POSITION_OFFSET },
       size: { width: 150, height: 50 },
     };
-
     addComponentToWorkspace(newComponent);
   };
 
@@ -127,8 +111,6 @@ const PageEditor = () => {
       position: { x: component.position.x + offset, y: component.position.y + offset },
       id: `${component.type}-${Date.now()}`,
     };
-    //setComponents((prev) => [...prev, newComponent]);
-    //setChosenComponents((prev) => prev.filter((comp) => comp !== component));
 
     // Save the new component to database
     await createComponent(pageId || '', {
@@ -138,48 +120,38 @@ const PageEditor = () => {
       componentXPosition: newComponent.position.x,
       componentYPosition: newComponent.position.y,
     });
-
     fetchComponents();
   };
 
   const removeComponentFromWorkspace = (id: string) => {
-
-    const componentToRemove:any = components.find((comp) => comp._id === id);
-
+    const componentToRemove: any = components.find((comp) => comp._id === id);
     if (componentToRemove) {
       setComponents((prev) => prev.filter((comp) => comp._id !== id));
       setRemovedComponents((prev) => [...prev, componentToRemove]);
-      
       deleteComponent(componentToRemove._id);
     }
   };
-
 
   const restoreComponent = (id: string) => {
     const componentToRestore = removedComponents.find((comp) => comp._id === id);
     if (componentToRestore) {
       setRemovedComponents((prev) => prev.filter((comp) => comp._id !== id));
-     /// setComponents((prev) => [...prev, componentToRestore]);
-
       addComponentToWorkspace(componentToRestore);
     }
   };
 
   // Back button click handler
   const handleBackButtonClick = () => {
- 
-      //console.log('Navigating back to project:', projectIdFromStorage); // Log the projectId for debugging
-      if (page) {
-        navigate(`/project/${page.projectId}`);  // Navigate back to the project page
-      }
-
+    if (page) {
+      navigate(`/project/${page.projectId}`);  // Navigate back to the project page
+    }
   };
-  // Edit component properties
 
+  // Edit component properties
   const editComponentProperties = (component: Component) => {
     setChosenComponents([component]);
     setIsEditing(component._id || null); // Set the component as being edited
-    if (component.type === COMPONENT_TYPES.RADIO || component.type === COMPONENT_TYPES.CHECKBOX ) {
+    if (component.type === COMPONENT_TYPES.RADIO || component.type === COMPONENT_TYPES.CHECKBOX) {
       setOptionValue(component.properties.content || '');
       setShowModal(true);
     }
@@ -187,50 +159,42 @@ const PageEditor = () => {
 
   // Update the saveComponentProperties function
   const saveComponentProperties = async (component: Component, content: string) => {
-    
     let updatedProperties = { ...component.properties };
+    // Handle Checkbox component: Update checked state
+    if (component.type === COMPONENT_TYPES.CHECKBOX) {
+      const currentCheckedState = updatedProperties.checked || [];
+      const isChecked = currentCheckedState.includes(content);
+      // Toggle the checked state for the specific checkbox (add/remove from array)
+      updatedProperties.checked = isChecked
+        ? currentCheckedState.filter((value: string) => value !== content)
+        : [...currentCheckedState, content];
+    }
 
-      // Handle Checkbox component: Update checked state
-      if (component.type === COMPONENT_TYPES.CHECKBOX) {
-        const currentCheckedState = updatedProperties.checked || [];
-        const isChecked = currentCheckedState.includes(content);
-
-        // Toggle the checked state for the specific checkbox (add/remove from array)
-        updatedProperties.checked = isChecked
-          ? currentCheckedState.filter((value: string) => value !== content)
-          : [...currentCheckedState, content];
-      }
-
-
-      // Handle Radio component: Update selected radio
-      else if (component.type === COMPONENT_TYPES.RADIO) {
-        updatedProperties = {
-          ...updatedProperties,
-          selected: content, // Update the selected option for radio
-          content: optionValue,
-        };
-      } else {
-        // For other components like Button, Header, etc.
-        updatedProperties = {
-          ...updatedProperties,
-          content: content, // Update text content
-        };
-      }
-
-      component.properties = updatedProperties;
-
-      await updateComponent(component._id || '', {
-        //properties: updatedProperties,
-        properties: updatedProperties,
-      });
-
-      fetchComponents();
-
-     // After saving, remove the component from the list of components being edited
-     setChosenComponents((prev) => prev.filter((comp) => comp._id !== component._id)); // Remove from chosen list
-     //setChosenComponents([]); // Clear the chosen components
-     setIsEditing(null); // Hide the form after saving
-     setShowModal(false); // Hide the modal after saving
+    // Handle Radio component: Update selected radio
+    else if (component.type === COMPONENT_TYPES.RADIO) {
+      updatedProperties = {
+        ...updatedProperties,
+        selected: content, // Update the selected option for radio
+        content: optionValue,
+      };
+    } else {
+      // For other components like Button, Header, etc.
+      updatedProperties = {
+        ...updatedProperties,
+        content: content, // Update text content
+      };
+    }
+    component.properties = updatedProperties;
+    await updateComponent(component._id || '', {
+      //properties: updatedProperties,
+      properties: updatedProperties,
+    });
+    fetchComponents();
+    // After saving, remove the component from the list of components being edited
+    setChosenComponents((prev) => prev.filter((comp) => comp._id !== component._id)); // Remove from chosen list
+    //setChosenComponents([]); // Clear the chosen components
+    setIsEditing(null); // Hide the form after saving
+    setShowModal(false); // Hide the modal after saving
   };
 
   const renderComponent = (component: Component) => {
@@ -240,16 +204,16 @@ const PageEditor = () => {
       case COMPONENT_TYPES.RADIO:
         return (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <label>
-                <input
-                  type="radio"
-                  name={component._id} // Make sure name is unique for each component
-                  checked={component.properties.selected === component.properties.content}
-                  onChange={() => saveComponentProperties(component, component.properties.content)}
-                />
-                {component.properties.content}
-              </label>
-            
+            <label>
+              <input
+                type="radio"
+                name={component._id} // Make sure name is unique for each component
+                checked={component.properties.selected === component.properties.content}
+                onChange={() => saveComponentProperties(component, component.properties.content)}
+              />
+              {component.properties.content}
+            </label>
+
           </div>
         );
       case COMPONENT_TYPES.CHECKBOX:
@@ -289,13 +253,11 @@ const PageEditor = () => {
       case COMPONENT_TYPES.PARAGRAPH:
         return <p>{component.properties.content || 'Paragraph'}</p>;
       case COMPONENT_TYPES.TEXTBOX:
-        return <input type="text" value={component.properties.content || ''} style={{ width: '100%', height: '100%' }} onChange={(e:any) => console.log(e)} />;
+        return <input type="text" value={component.properties.content || ''} style={{ width: '100%', height: '100%' }} onChange={(e: any) => console.log(e)} />;
       default:
         return <div style={{ color: 'red' }}>Component type not recognized</div>;
     }
   };
-
-
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -332,7 +294,7 @@ const PageEditor = () => {
         </div>
       ) : (
         <div>
-          <h3>{page ? page.pageName :  "Page"}</h3>
+          <h3>{page ? page.pageName : "Page"}</h3>
           <button onClick={() => setIsEditingPageName(true)}>Edit page</button>
         </div>
       )}
