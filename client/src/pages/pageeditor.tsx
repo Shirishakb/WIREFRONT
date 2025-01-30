@@ -9,7 +9,6 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-
 interface Component {
   _id?: string;
   id?: string,
@@ -36,28 +35,19 @@ const PageEditor = () => {
   const [showModal, setShowModal] = useState(false); // To control modal visibility
   const [optionValue, setOptionValue] = useState<string>(''); // The new value for the option
 
-
-
   useEffect(() => {
     if (pageId) {
       fetchPage(pageId);
       fetchComponents();
-
-
-
-
     }
   }, [pageId]);
   
- 
-
   // Use page name from location state if available
   useEffect(() => {
     if (pageId) {
       fetchPage(pageId);
     }
   }, [location.state, pageId]);
-
 
 // Fetch details from API"
   const fetchPage = async (pageId: string) => {
@@ -68,17 +58,12 @@ const PageEditor = () => {
   };
 
   const handleSavePageName = async () => {
-  
       if (page && pageId && newPageName)
       {
         await updatePage(pageId, { pageName: newPageName });
-
         setPage({ ...page, pageName: newPageName });
-
         setIsEditingPageName(false);
       }
-
-
   };
 
   const handleCancelEdit = () => {
@@ -101,14 +86,11 @@ const PageEditor = () => {
           size: { width: comp.componentWidth, height: comp.componentHeight },
         });
       }
-
       setComponents(comps);
-
     } catch (error) {
       console.error('Error fetching components:', error);
     }
   };
-
   const addComponent = () => {
     const newComponent: Component = {
       type: newComponentType,
@@ -116,7 +98,6 @@ const PageEditor = () => {
       position: { x: DEFAULT_POSITION_OFFSET, y: DEFAULT_POSITION_OFFSET },
       size: { width: 150, height: 50 },
     };
-
     addComponentToWorkspace(newComponent);
   };
 
@@ -127,9 +108,6 @@ const PageEditor = () => {
       position: { x: component.position.x + offset, y: component.position.y + offset },
       id: `${component.type}-${Date.now()}`,
     };
-    //setComponents((prev) => [...prev, newComponent]);
-    //setChosenComponents((prev) => prev.filter((comp) => comp !== component));
-
     // Save the new component to database
     await createComponent(pageId || '', {
       componentType: component.type,
@@ -138,41 +116,31 @@ const PageEditor = () => {
       componentXPosition: newComponent.position.x,
       componentYPosition: newComponent.position.y,
     });
-
     fetchComponents();
   };
 
   const removeComponentFromWorkspace = (id: string) => {
-
     const componentToRemove:any = components.find((comp) => comp._id === id);
-
     if (componentToRemove) {
       setComponents((prev) => prev.filter((comp) => comp._id !== id));
       setRemovedComponents((prev) => [...prev, componentToRemove]);
-      
       deleteComponent(componentToRemove._id);
     }
   };
-
 
   const restoreComponent = (id: string) => {
     const componentToRestore = removedComponents.find((comp) => comp._id === id);
     if (componentToRestore) {
       setRemovedComponents((prev) => prev.filter((comp) => comp._id !== id));
-     /// setComponents((prev) => [...prev, componentToRestore]);
-
       addComponentToWorkspace(componentToRestore);
     }
   };
 
   // Back button click handler
   const handleBackButtonClick = () => {
- 
-      //console.log('Navigating back to project:', projectIdFromStorage); // Log the projectId for debugging
       if (page) {
         navigate(`/project/${page.projectId}`);  // Navigate back to the project page
       }
-
   };
   // Edit component properties
 
@@ -187,7 +155,6 @@ const PageEditor = () => {
 
   // Update the saveComponentProperties function
   const saveComponentProperties = async (component: Component, content: string) => {
-    
     let updatedProperties = { ...component.properties };
 
       // Handle Checkbox component: Update checked state
@@ -200,8 +167,6 @@ const PageEditor = () => {
           ? currentCheckedState.filter((value: string) => value !== content)
           : [...currentCheckedState, content];
       }
-
-
       // Handle Radio component: Update selected radio
       else if (component.type === COMPONENT_TYPES.RADIO) {
         updatedProperties = {
@@ -216,16 +181,12 @@ const PageEditor = () => {
           content: content, // Update text content
         };
       }
-
       component.properties = updatedProperties;
-
       await updateComponent(component._id || '', {
         //properties: updatedProperties,
         properties: updatedProperties,
       });
-
       fetchComponents();
-
      // After saving, remove the component from the list of components being edited
      setChosenComponents((prev) => prev.filter((comp) => comp._id !== component._id)); // Remove from chosen list
      //setChosenComponents([]); // Clear the chosen components
@@ -294,8 +255,6 @@ const PageEditor = () => {
         return <div style={{ color: 'red' }}>Component type not recognized</div>;
     }
   };
-
-
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>

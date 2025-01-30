@@ -40,11 +40,8 @@ const ProjectPage = () => {
     useEffect(() => {
 
         if (projectId) {
-
             localStorage.setItem('projectId', projectId);
-
             console.log('Stored projectId in localStorage:', projectId);
-
         }
 
     }, [projectId]);
