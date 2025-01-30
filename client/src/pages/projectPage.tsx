@@ -90,7 +90,7 @@ const ProjectPage = () => {
                 navigate(`/pageeditor/${page.pageId}`);
             }
         } else {
-            pageSpanEl.innerText = "Please enter a project name!";
+            pageSpanEl.innerText = "Please enter a page name!";
         }
     }
 
