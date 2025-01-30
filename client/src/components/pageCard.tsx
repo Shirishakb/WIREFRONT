@@ -22,7 +22,7 @@ interface Props {
     const navigate = useNavigate();
 
     if (!page.image) {
-      page.image = "../public/Placeholder2.png";
+      page.image = "../Placeholder2.png";
     }
 
     const deletePageCard = async (pageId: string) => {    
