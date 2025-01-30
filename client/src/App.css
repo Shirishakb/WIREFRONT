@@ -24,11 +24,52 @@ h6 {
   background-color: var(--secondary-color);
 }
 
+#backButton {
+  position: absolute;
+  color: darkred;
+  font-size: 5rem;
+  font-weight: bold;
+  text-shadow: 0 0 5px black;
+  margin-top: -2rem;
+  margin-left: -2rem;
+}
+
+#backButton:hover {
+  cursor: pointer;
+  color: rgb(192, 0, 0);
+  text-shadow: 0 0 10px black;
+}
+
 #projectsTitle, #pagesTitle {
   text-align: center;
 }
 
 .projectsContainer, .pagesContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#projectCreate, #pageCreate {
+  color: darkblue;
+  text-decoration: underline;
+  text-shadow: 0 0 5px white;
+  /*font-weight: bold;*/
+}
+
+#projectCreate:hover, #pageCreate:hover {
+  cursor: pointer;
+  color: blue;
+  text-shadow: 0 0 10px white;
+  /*font-weight: bold;*/
+}
+
+#createProjectSpan, #createPageSpan {
+  color: red;
+}
+
+.projectCardContainer, .pageCardContainer {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -46,6 +87,34 @@ h6 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.projectCard:hover, .pageCard:hover {
+  cursor: pointer;
+  box-shadow: 0 0 20px #ccc;
+}
+
+.projectCard:hover .projectH3, .pageCard:hover .pageH3 {
+  color: blue;
+}
+
+.deleteButton {
+  position: absolute;
+  color: white;
+  background-color: darkred;
+  font-size: 1rem;
+  font-weight: bold;
+  filter: drop-shadow(0 0 5px white);
+  border: none;
+  border-radius: 50%;
+  margin-left: -1.5rem;
+}
+
+.deleteButton:hover {
+  cursor: pointer;
+  color: white;
+  background-color: rgb(192, 0, 0);
+  filter: drop-shadow(0 0 10px white);
 }
 
 .projectImg, .pageImg {
