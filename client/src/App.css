@@ -166,3 +166,28 @@ h6 {
   font-size: 1.25rem;
   font-family: 'Rubik', sans-serif;
 }
+
+@media (max-width: 600px) {
+  .projectsContainer, .pagesContainer {
+    flex-direction: column;
+  }
+
+  #backButton {
+    font-size: 3rem;
+    margin-top: -1rem;
+    margin-left: -1rem;
+  }
+
+  .deleteButton {
+    font-size: 0.8rem;
+    margin-left: -1rem;
+  }
+
+  .footerH3 {
+    display: none;
+  }
+
+  .footerImg {
+    margin: 0 0 5px 0;
+  }
+}

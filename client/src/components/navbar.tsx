@@ -1,15 +1,56 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Navbar, Nav, Container, Modal, Tab, Button } from 'react-bootstrap';
 import {createProject} from '../api/projects';
 import SignUpForm from './signupform';
 import LoginForm from './LoginForm';
 import Auth from '../utils/auth';
+//import { create } from '@mui/material/styles/createTransitions';
+import { createPage } from '../api/pages';
 
 const AppNavbar = () => {
   // set modal display state
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const [createModal, setCreateModal] = useState(false);
+  const location = useLocation();
+  const [state, setState] = useState('');
+
+  console.log('location', location);
+
+  const projectId = location.pathname.substring(9);
+
+  useEffect(() => {
+    if (location.pathname.substring(0, 9) === '/project/') {
+      setState('project');
+      console.log('projectId', projectId);
+    } else if (location.pathname.substring(0, 11) === '/pageeditor/') {
+      setState('page');
+    } else {
+      setState('landing');
+    }
+  }, [location]);
+
+  const createProjectCard = async () => {
+    const projectName = (document.getElementById('createProjectTextBox') as HTMLInputElement).value;
+    console.log('projectName', projectName);
+    const projectData = await createProject(projectName);
+    setCreateModal(false);
+    if (projectData) {
+      navigate(`/project/${projectData.projectId}`);
+    }
+  }
+
+  const createPageCard = async (projectId: string) => {
+    const pageName = (document.getElementById('createPageTextBox') as HTMLInputElement).value;
+    console.log('pageName', pageName);
+    console.log('projectId', projectId);
+    const pageData = await createPage(projectId, pageName);
+    setCreateModal(false);
+    if (pageData) {
+      navigate(`/pageeditor/${pageData.pageId}`);
+    }
+  }
 
   return (
     <>
@@ -18,36 +59,19 @@ const AppNavbar = () => {
           <Navbar.Brand as={Link} to='/'>
             Wireframe Builder
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls='navbar' />
-          <Navbar.Collapse id='navbar' className='d-flex flex-row-reverse'>
-            <Nav className='ml-auto d-flex'>
-              {/* if user is logged in show saved books and logout */}
-              {Auth.loggedIn() ? (
-                <>
+          <Nav className='ml-auto d-flex'>
+            {/* if user is logged in show saved books and logout */}
+            {Auth.loggedIn() ? (
+              <>
+                {state === 'landing' &&  <Nav.Link onClick={() => {setCreateModal(true)}}>Create Project</Nav.Link> }
+                {state === 'project' &&  <Nav.Link onClick={() => {setCreateModal(true)}}>Create Page</Nav.Link> }
+                <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
 
-                  <button onClick={ async () => {
-                    const projectName = prompt('Enter the name of your project');
-
-                    if (projectName) {
-                      const project = await createProject(projectName);
-                      console.log("project: ", project);
-                      if (project) {
-                        navigate(`/project/${project.projectId}`);
-                      }
-                    }
-                  }}>New Project</button>
-
-                  <Nav.Link as={Link} to='/projects'>
-                    See Your Projects
-                  </Nav.Link>
-                  <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
-
-                </>
-              ) : (
-                <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>
-              )}
-            </Nav>
-          </Navbar.Collapse>
+              </>
+            ) : (
+              <Nav.Link onClick={() => setShowModal(true)}>Login/Sign Up</Nav.Link>
+            )}
+          </Nav>
         </Container>
       </Navbar>
       {/* set modal data up */}
@@ -82,6 +106,29 @@ const AppNavbar = () => {
           </Modal.Body>
         </Tab.Container>
       </Modal>
+      {<Modal
+          show={createModal}
+          onHide={() => setCreateModal(false)}
+          aria-labelledby='create-modal'>
+          <Modal.Header closeButton>
+              {state === 'landing' ? <Modal.Title>Create Project</Modal.Title> : <Modal.Title>Create Page</Modal.Title>}
+          </Modal.Header>
+
+          <Modal.Body>
+            <div>
+                {state === 'landing' ? <span id="createProjectSpan"></span> : <span id="createPageSpan"></span>}
+            </div>
+            <div>
+                {state === 'landing' ? <label htmlFor="createProjectTextBox">Project Name: </label> : <label htmlFor="createPageTextBox">Page Name: </label> }
+                {state === 'landing' ? <input type="text" id="createProjectTextBox" name="createPageTextBox"/> : <input type="text" id="createPageTextBox" name="createPageTextBox"/> }
+            </div>
+          </Modal.Body>
+
+          <Modal.Footer>
+              <Button variant="secondary" onClick={()=> setCreateModal(false)}>Cancel</Button>
+              {state === 'landing' ? <Button variant="primary" onClick={() => createProjectCard()}>Confirm</Button> : <Button variant="primary" onClick={() => createPageCard(projectId)}>Confirm</Button> }
+          </Modal.Footer>
+      </Modal>}
     </>
   );
 };
