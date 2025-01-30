@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from db import projects
 from bson.objectid import ObjectId
 
-project_bp = Blueprint("project_bp", __name__)
+project_bp = Blueprint("project", __name__)
 
 # Create a new project
 @project_bp.route("/api/project", methods=["POST"])
