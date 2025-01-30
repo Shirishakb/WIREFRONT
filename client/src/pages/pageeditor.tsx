@@ -23,7 +23,7 @@ const DEFAULT_POSITION_OFFSET = 50; // Offset for new components to avoid overla
 
 const PageEditor = () => {
   const { pageId } = useParams();
-  const [page, setPage] = useState<{ name: string; _id: string; width: number; height: number } | null>(null);
+  const [page, setPage] = useState<{ name: string; projectId: String; pageId: string; width: number; height: number } | null>(null);
   const [newPageName, setNewPageName] = useState<string>('');
   const [isEditingPageName, setIsEditingPageName] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -226,7 +226,7 @@ const PageEditor = () => {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
           <button
-            onClick={() => navigate(`/project/${pageId || 'undefined'}`)}
+            onClick={() => navigate(`/project/${page?.projectId || 'undefined'}`)}
             style={{
               backgroundColor: 'transparent',
               border: 'none',
