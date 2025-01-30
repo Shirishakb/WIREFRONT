@@ -52,11 +52,18 @@ const ProjectCard = (props: Props) => {
   return (
     <>
       <div className="projectCardContainer">
-        <div className="projectCard bg-dark" onClick={() => {moveToProjectPage(project.projectId)}}>
+        {loggedIn ? 
+          <div className="projectCard bg-dark" onClick={() => {moveToProjectPage(project.projectId)}}>
             <img className="projectImg" src={project.image} alt={project.projectName} />
             <h3 className="projectH3">{project.projectName}</h3>
             <p className="projectP">{project.author}</p>
-        </div>
+          </div> : 
+          <div className="projectCardLO bg-dark">
+            <img className="projectImg" src={project.image} alt={project.projectName} />
+            <h3 className="projectH3">{project.projectName}</h3>
+            <p className="projectP">{project.author}</p>
+          </div> 
+        }
         {loggedIn ?
           <div className="deleteProject">
             <input className="deleteButton" type="button" value="X" onClick={(e) => {

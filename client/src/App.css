@@ -76,7 +76,7 @@ h6 {
   justify-content: center;
 }
 
-.projectCard, .pageCard {
+.projectCard, .pageCard, .projectCardLO {
   width: 170px;
   height: 180px;
   margin: 10px;
