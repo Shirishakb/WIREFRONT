@@ -1,9 +1,10 @@
 import PageCard from '../components/pageCard';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getPages } from '../api/pages';
 import { useEffect, useState } from 'react';
 import { getProjectById } from '../api/projects';
 import { createPage } from '../api/pages';
+import { Modal, Button } from 'react-bootstrap';
 
 /*interface Project {
     _id: string;
@@ -32,6 +33,8 @@ const ProjectPage = () => {
         author: '',
     });
     const [pages, setPages] = useState<any[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [childDeleted, setChildDeleted] = useState(false);
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -47,7 +50,11 @@ const ProjectPage = () => {
 
         fetchProject();
         fetchPages();
-    }, [projectId]);
+    }, [childDeleted]);
+
+    const handleDelete = async () => {
+        setChildDeleted(true);
+    };
 
     // This would hit getPages with projectId
     // Mock data for pages
@@ -65,29 +72,66 @@ const ProjectPage = () => {
     }
 
    const pagesComponent = pages.map((page, index) => (
-        <Link to={`/pageeditor/${page.pageId}`} key={index}>
-            <PageCard key={index} page={page} />
-        </Link>
+        <PageCard key={index} page={page} onDelete={handleDelete} />
     ));
 
-    return (
-        <div id="projectPages" className="text-light p-5">
-            <h1 id="pagesTitle">{project.projectName}</h1>
-            <div className="pagesContainer">
-                {pages.length > 0 ? pagesComponent : <p>No pages found, please click 
-                            <button onClick={ async () => {
-                                const pageName = prompt('Enter the name of your page');
+    const namePage = async () => {
+        const pageNameEl = document.getElementById("createPageTextBox") as HTMLInputElement;
+        const pageSpanEl = document.getElementById("createPageSpan") as HTMLSpanElement;
+        
+        if (!pageNameEl || !pageSpanEl) {
+            return;
+        }
+        const pageName = pageNameEl.value;
 
-                                if (pageName) {
-                                    const page = await createPage(project.projectId, pageName);
-                                    console.log("page: ", page);
-                                    if (page) {
-                                        navigate(`/pageeditor/${page.pageId}`);
-                                    }
-                                }
-                            }}>here</button> to create one!</p>}
+        if (pageName) {
+            const page = await createPage(projectId, pageName);
+            if (page) {
+                navigate(`/pageeditor/${page.pageId}`);
+            }
+        } else {
+            pageSpanEl.innerText = "Please enter a project name!";
+        }
+    }
+
+    return (
+        <>
+            <div id="projectPages" className="text-light p-5">
+                <span id="backButton" onClick={() => navigate(`/`)}>&lt;</span>
+                <h1 id="pagesTitle">{project.projectName}</h1>
+                <div className="pagesContainer">
+                    {pages.length > 0 ? pagesComponent : <p>No pages found, please click 
+                                <a id="pageCreate"onClick={ async (e) => {
+                                    e.preventDefault();
+                                    
+                                    setShowModal(true);
+                                }}> here</a> to create one!</p>}
+                </div>
             </div>
-        </div>
+            <Modal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                aria-labelledby='create-page-modal'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Create Page</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <div>
+                        <span id="createPageSpan"></span>
+                    </div>
+                    <div>
+                        <label htmlFor="createPageTextBox">Page Name: </label>
+                        <input type="text" id="createPageTextBox" name="createPageTextBox"/>
+                    </div>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={()=> setShowModal(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={() => namePage()}>Create +</Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     );
 };
 
