@@ -39,8 +39,8 @@ interface Props {
       }
     }
   
-    const moveToPage = (projectId: string) => {
-      navigate(`/project/${projectId}`);
+    const moveToPage = (pageId: string) => {
+      navigate(`/pageeditor/${pageId}`);
     }
 
     return (
