@@ -169,7 +169,9 @@ const PageEditor = () => {
   const handleBackButtonClick = () => {
  
       //console.log('Navigating back to project:', projectIdFromStorage); // Log the projectId for debugging
-      navigate(`/project/${page.projectId}`);  // Navigate back to the project page
+      if (page) {
+        navigate(`/project/${page.projectId}`);  // Navigate back to the project page
+      }
 
   };
   // Edit component properties
