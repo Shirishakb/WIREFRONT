@@ -36,6 +36,18 @@ const ProjectPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [childDeleted, setChildDeleted] = useState(false);
 
+    // Store the projectId in localStorage when the component loads
+    useEffect(() => {
+
+        if (projectId) {
+
+            localStorage.setItem('projectId', projectId);
+
+            console.log('Stored projectId in localStorage:', projectId);
+
+        }
+
+    }, [projectId]);
     useEffect(() => {
         const fetchProject = async () => {
             const data = await getProjectById(projectId);
