@@ -6,6 +6,5 @@ export const COMPONENT_TYPES = {
     LINK: 'Link',
     PARAGRAPH: 'Paragraph',
     RADIO: 'Radio Button',
-    SELECT: 'Select',
     TEXTBOX: 'Textbox',
 };

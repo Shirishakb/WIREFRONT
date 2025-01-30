@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd'; // Using react-rnd for resizing and dragging
-import { useParams } from 'react-router-dom';
+import { useParams ,useLocation, useNavigate} from 'react-router-dom';
 import { getPageById, updatePage } from '../api/pages';
 import { getComponents } from '../api/components';
 import { COMPONENT_TYPES } from '../constants';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,7 +22,8 @@ const DEFAULT_POSITION_OFFSET = 50; // Offset for new components to avoid overla
 
 const PageEditor = () => {
   const { pageId } = useParams();
-  const [page, setPage] = useState<{ name: string; projectId: String; pageId: string; width: number; height: number } | null>(null);
+  const location = useLocation();
+  const [page, setPage] = useState<{ name: string; _id: string; width: number; height: number } | null>(null);
   const [newPageName, setNewPageName] = useState<string>('');
   const [isEditingPageName, setIsEditingPageName] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -35,13 +35,47 @@ const PageEditor = () => {
   const [showModal, setShowModal] = useState(false); // To control modal visibility
   const [optionValue, setOptionValue] = useState<string>(''); // The new value for the option
 
+  // Get the projectId from localStorage
+  const projectIdFromStorage = localStorage.getItem('projectId');
+
+  useEffect(() => {
+    console.log('Current projectId from localStorage:', projectIdFromStorage); // Log projectId
+    console.log('Current pageId:', pageId); // Log pageId
+  }, [projectIdFromStorage, pageId]);
+
   useEffect(() => {
     if (pageId) {
       fetchPage(pageId);
+      const savedComponents = localStorage.getItem(`components-${pageId}`);
+      if (savedComponents) {
+        const parsedComponents = JSON.parse(savedComponents);
+        setComponents(parsedComponents);  // Load the saved components
+      } else {
+        fetchComponents(); // Fetch from API if nothing is saved
+      }
     }
-    fetchComponents();
   }, [pageId]);
+  
+  
+   // Load saved components from localStorage when the page loads
+   useEffect(() => {
+    if (pageId && components.length > 0) {
+      console.log('Saving components to localStorage:', components);  // Debug log
+      localStorage.setItem(`components-${pageId}`, JSON.stringify(components)); // Save components
+    }
+  }, [components, pageId]);
 
+  // Use page name from location state if available
+  useEffect(() => {
+    if (location.state && location.state.pageName) {
+      setNewPageName(location.state.pageName);  // Set page name from state passed during navigation
+    } else if (pageId) {
+      fetchPage(pageId);
+    }
+  }, [location.state, pageId]);
+
+
+// Fetch details from API"
   const fetchPage = async (pageId: string) => {
     const data = await getPageById(pageId);
     if (data) {
@@ -49,9 +83,15 @@ const PageEditor = () => {
       setNewPageName(data.name); // Initialize newPageName with the current page name
     }
   };
+// Save components to localStorage whenever they change
+  useEffect(() => {
+    if (pageId) {
+      localStorage.setItem(`components-${pageId}`, JSON.stringify(components)); // Save components
+    }
+  }, [components, pageId]);
 
   const handleSavePageName = async () => {
-    if (page) {
+    if (page && newPageName !== page.name) {
       if (pageId) {
         await updatePage(pageId, { pageName: newPageName });
       }
@@ -114,11 +154,22 @@ const PageEditor = () => {
     }
   };
 
+  // Back button click handler
+  const handleBackButtonClick = () => {
+    if (projectIdFromStorage) {
+      console.log('Navigating back to project:', projectIdFromStorage); // Log the projectId for debugging
+      navigate(`/project/${projectIdFromStorage}`);  // Navigate back to the project page
+    } else {
+      console.error('No projectId found in localStorage');
+    }
+  };
+  // Edit component properties
+
   const editComponentProperties = (component: Component) => {
     setChosenComponents([component]);
     setIsEditing(component.id || null); // Set the component as being edited
-    if (component.type === COMPONENT_TYPES.RADIO || component.type === COMPONENT_TYPES.CHECKBOX || component.type === COMPONENT_TYPES.SELECT) {
-      setOptionValue(component.properties.selected || '');
+    if (component.type === COMPONENT_TYPES.RADIO || component.type === COMPONENT_TYPES.CHECKBOX ) {
+      setOptionValue(component.properties.content || '');
       setShowModal(true);
     }
   };
@@ -126,24 +177,44 @@ const PageEditor = () => {
   // Update the saveComponentProperties function
   const saveComponentProperties = (component: Component, content: string) => {
     setComponents((prev) =>
-      prev.map((comp) =>
-        comp.id === component.id
-          ? {
-            ...comp,
-            properties: {
-              ...comp.properties,
-              content: content, // This is the general property we're editing (for text-based components)
-              selected: component.type === COMPONENT_TYPES.RADIO || component.type === COMPONENT_TYPES.SELECT
-                ? content // For select and radio, we store the selected option
-                : component.properties.selected,
-              checked: component.type === COMPONENT_TYPES.CHECKBOX
-                ? content // For checkboxes, we handle checked status
-                : component.properties.checked,
-            },
+      prev.map((comp) => {
+        if (comp.id === component.id) {
+          let updatedProperties = { ...comp.properties };
+
+          // Handle Checkbox component: Update checked state
+          if (component.type === COMPONENT_TYPES.CHECKBOX) {
+            const currentCheckedState = updatedProperties.checked || [];
+            const isChecked = currentCheckedState.includes(content);
+
+            // Toggle the checked state for the specific checkbox (add/remove from array)
+            updatedProperties.checked = isChecked
+              ? currentCheckedState.filter((value: string) => value !== content)
+              : [...currentCheckedState, content];
           }
-          : comp
-      )
+
+
+          // Handle Radio component: Update selected radio
+          else if (component.type === COMPONENT_TYPES.RADIO) {
+            updatedProperties = {
+              ...updatedProperties,
+              selected: content, // Update the selected option for radio
+              content: optionValue,
+            };
+          } else {
+            // For other components like Button, Header, etc.
+            updatedProperties = {
+              ...updatedProperties,
+              content: content, // Update text content
+            };
+          }
+
+          return { ...comp, properties: updatedProperties };
+        }
+        return comp;
+      })
     );
+
+    // After saving, remove the component from the list of components being edited
     setChosenComponents((prev) => prev.filter((comp) => comp.id !== component.id)); // Remove from chosen list
     setIsEditing(null); // Hide the form after saving
     setShowModal(false); // Hide the modal after saving
@@ -156,45 +227,44 @@ const PageEditor = () => {
       case COMPONENT_TYPES.RADIO:
         return (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label>
-              <input
-                type="radio"
-                name={component.id} // Make sure name is unique for each component
-                checked={component.properties.selected === 'Option 1'}
-                onChange={() => saveComponentProperties(component, 'Option 1')}
-              />
-              Option 1
-            </label>
-            <label>
-              <input
-                type="radio"
-                name={component.id} // Same as above
-                checked={component.properties.selected === 'Option 2'}
-                onChange={() => saveComponentProperties(component, 'Option 2')}
-              />
-              Option 2
-            </label>
+              <label>
+                <input
+                  type="radio"
+                  name={component.id} // Make sure name is unique for each component
+                  checked={component.properties.selected === component.properties.content}
+                  onChange={() => saveComponentProperties(component, component.properties.content)}
+                />
+                {component.properties.content}
+              </label>
+            
           </div>
         );
       case COMPONENT_TYPES.CHECKBOX:
         return (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={component.properties.checked === 'Check 1'} // Modify logic as needed
-                onChange={() => saveComponentProperties(component, 'Check 1')}
-              />
-              Check 1
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={component.properties.checked === 'Check 2'}
-                onChange={() => saveComponentProperties(component, 'Check 2')}
-              />
-              Check 2
-            </label>
+            {/* Iterate over each checkbox option and allow the user to edit the name */}
+            {component.properties.checked?.map((label: string) => (
+              <label key={label}>
+                <input
+                  type="checkbox"
+                  checked={component.properties.checked?.includes(label)} // Ensure correct checked state is passed
+                  onChange={() => saveComponentProperties(component, label)} // Toggle checkbox state
+                />
+                {isEditing === component.id ? (
+                  <input
+                    type="text"
+                    value={optionValue} // Use the optionValue state to handle input value
+                    onChange={(e) => setOptionValue(e.target.value)} // Allow editing the name
+                    onBlur={() => {
+                      saveComponentProperties(component, optionValue); // Save the new label
+                      setIsEditing(null); // Close editing mode after save
+                    }}
+                  />
+                ) : (
+                  label // Display the option name
+                )}
+              </label>
+            ))}
           </div>
         );
       case COMPONENT_TYPES.HEADER:
@@ -205,185 +275,141 @@ const PageEditor = () => {
         return <div style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>{component.properties.content || 'Container'}</div>;
       case COMPONENT_TYPES.PARAGRAPH:
         return <p>{component.properties.content || 'Paragraph'}</p>;
-      case COMPONENT_TYPES.SELECT:
-        return (
-          <select
-            style={{ width: '100%', height: '100%' }}
-            value={component.properties.selected || ''}
-            onChange={(e) => saveComponentProperties(component, e.target.value)}
-          >
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-          </select>
-        );
       case COMPONENT_TYPES.TEXTBOX:
         return <input type="text" value={component.properties.content || ''} style={{ width: '100%', height: '100%' }} />;
       default:
         return <div style={{ color: 'red' }}>Component type not recognized</div>;
     }
   };
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-          <button
-            onClick={() => navigate(`/project/${page?.projectId || 'undefined'}`)}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'black',
-              cursor: 'pointer',
-              padding: '0',
-              marginBottom: '10px',
-              fontSize: '16px',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              width: 'auto',
-            }}
-            title="Back to Project Page"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </button>
-          <h2 style={{ color: '#4CAF50' }}>Interactive Page Editor</h2>
-          {/* Page Name Editing Section */}
-          {isEditingPageName ? (
-            <div>
-              <input
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <button
+        onClick={handleBackButtonClick}  // Use the handleBackButtonClick function
+        style={{
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: 'black',
+          cursor: 'pointer',
+          padding: '0',
+          marginBottom: '10px',
+          fontSize: '16px',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: 'auto',
+        }}
+        title="Back to Project Page"
+      >
+        <FontAwesomeIcon icon={faArrowLeft} />
+      </button>
+      <h2 style={{ color: '#4CAF50' }}>Interactive Page Editor</h2>
+      {/* Page Name Editing Section */}
+      {isEditingPageName ? (
+        <div>
+          <input
+            type="text"
+            value={newPageName}
+            onChange={(e) => setNewPageName(e.target.value)}
+            placeholder="Edit page name"
+          />
+          <button onClick={handleSavePageName}>Save</button>
+          <button onClick={handleCancelEdit}>Cancel</button>
+        </div>
+      ) : (
+        <div>
+          <h3>{newPageName|| "Page"}</h3>
+          <button onClick={() => setIsEditingPageName(true)}>Edit page</button>
+        </div>
+      )}
+      {/* Modal for editing radio/checkbox options */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Option</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="editOption">
+              <Form.Label>Edit Option</Form.Label>
+              <Form.Control
                 type="text"
-                value={newPageName}
-                onChange={(e) => setNewPageName(e.target.value)}
-                placeholder="Edit page name"
+                value={optionValue}
+                onChange={(e) => setOptionValue(e.target.value)}
               />
-              <button onClick={handleSavePageName}>Save</button>
-              <button onClick={handleCancelEdit}>Cancel</button>
-            </div>
-          ) : (
-            <div>
-              <h3>{page?.name || pageId || "Page"}</h3>
-              <button onClick={() => setIsEditingPageName(true)}>Edit page</button>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (chosenComponents.length > 0) {
+                saveComponentProperties(chosenComponents[0], optionValue);
+              }
+              setShowModal(false);
+            }}
+          >
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <div>
+        <label htmlFor="componentType">Choose Component: </label>
+        <select
+          id="componentType"
+          value={newComponentType}
+          onChange={(e) => setNewComponentType(e.target.value)}
+          style={{ marginRight: '10px' }}
+        >
+          {Object.values(COMPONENT_TYPES).map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={addComponent}
+          style={{
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '5px 10px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Add
+        </button>
+      </div>
 
-            </div>
-          )}
-          {/* Modal for editing radio/select/checkbox options */}
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Edit Option</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group controlId="editOption">
-                  <Form.Label>Edit Option</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={optionValue}
-                    onChange={(e) => setOptionValue(e.target.value)}
-                  />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>
-                Close
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  if (chosenComponents.length > 0) {
-                    saveComponentProperties(chosenComponents[0], optionValue);
-                  }
-                  setShowModal(false);
-                }}
-              >
-                Save
-              </Button>
-            </Modal.Footer>
-          </Modal>
-          <div>
-            <label htmlFor="componentType">Choose Component: </label>
-            <select
-              id="componentType"
-              value={newComponentType}
-              onChange={(e) => setNewComponentType(e.target.value)}
-              style={{ marginRight: '10px' }}
-            >
-              {Object.values(COMPONENT_TYPES).map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={addComponent}
-              style={{
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                padding: '5px 10px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
-            >
-              Add
-            </button>
-          </div>
-
-          <div style={{ border: '1px solid #ddd', padding: '10px', background: '#f9f9f9' }}>
-            <h3>Chosen Components</h3>
-            {chosenComponents.length > 0 ? (
-              <ul>
-                {chosenComponents.map((component, index) => (
-                  <li key={`${component.type}-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                    {isEditing === component.id ? (
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          const form = e.target as HTMLFormElement;
-                          const formData = new FormData(form);
-                          const content = formData.get('content') as string;
-                          saveComponentProperties(component, content);
-                        }}
-                      >
-                        <textarea placeholder="Text for component..." name="content" />
-                        <button type="submit">Save</button>
-                      </form>
-                    ) : (
-                      <>
-                        <span>{component.type}</span>
-                        <button
-                          onClick={() => editComponentProperties(component)}
-                          style={{
-                            marginLeft: '10px',
-                            backgroundColor: '#2196F3',
-                            color: 'white',
-                            padding: '3px 8px',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No components chosen yet.</p>
-            )}
-          </div>
-
-          <div style={{ marginTop: '20px' }}>
-            <h3>Removed Components</h3>
-            {removedComponents.length > 0 ? (
-              <ul>
-                {removedComponents.map((component) => (
-                  <li key={component.id}>
+      <div style={{ border: '1px solid #ddd', padding: '10px', background: '#f9f9f9' }}>
+        <h3>Chosen Components</h3>
+        {chosenComponents.length > 0 ? (
+          <ul>
+            {chosenComponents.map((component, index) => (
+              <li key={`${component.type}-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                {isEditing === component.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement;
+                      const formData = new FormData(form);
+                      const content = formData.get('content') as string;
+                      saveComponentProperties(component, content);
+                    }}
+                  >
+                    <textarea placeholder="Text for component..." name="content" />
+                    <button type="submit">Save</button>
+                  </form>
+                ) : (
+                  <>
                     <span>{component.type}</span>
                     <button
-                      onClick={() => restoreComponent(component.id || '')}
+                      onClick={() => editComponentProperties(component)}
                       style={{
                         marginLeft: '10px',
-                        backgroundColor: '#4CAF50',
+                        backgroundColor: '#2196F3',
                         color: 'white',
                         padding: '3px 8px',
                         border: 'none',
@@ -391,99 +417,130 @@ const PageEditor = () => {
                         cursor: 'pointer',
                       }}
                     >
-                      Restore
+                      Edit
                     </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No removed components yet.</p>
-            )}
-          </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No components chosen yet.</p>
+        )}
+      </div>
 
-          <div style={{ position: 'relative', width: '100%', height: '500px', border: '1px solid #ddd', background: '#fff', overflow: 'hidden', marginTop: '20px' }}>
-            <h3>Workspace</h3>
-            {components.map((component) => (
-              <Rnd
-                key={component.id}
-                size={component.size}
-                position={component.position}
-                onDragStop={(_, data) => {
-                  setComponents((prev) =>
-                    prev.map((comp) =>
-                      comp.id === component.id ? { ...comp, position: { x: data.x, y: data.y } } : comp
-                    )
-                  );
-                }}
-                onResizeStop={(_, __, ref, ___, position) => {
-                  setComponents((prev) =>
-                    prev.map((comp) =>
-                      comp.id === component.id
-                        ? { ...comp, size: { width: ref.offsetWidth, height: ref.offsetHeight }, position }
-                        : comp
-                    )
-                  );
-                }}
-                bounds="parent"
-                enableResizing={{
-                  top: true,
-                  right: true,
-                  bottom: true,
-                  left: true,
-                  topLeft: true,
-                  topRight: true,
-                  bottomLeft: true,
-                  bottomRight: true,
-                }}
+      <div style={{ marginTop: '20px' }}>
+        <h3>Removed Components</h3>
+        {removedComponents.length > 0 ? (
+          <ul>
+            {removedComponents.map((component) => (
+              <li key={component.id}>
+                <span>{component.type}</span>
+                <button
+                  onClick={() => restoreComponent(component.id || '')}
+                  style={{
+                    marginLeft: '10px',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    padding: '3px 8px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No removed components yet.</p>
+        )}
+      </div>
+
+      <div style={{ position: 'relative', width: '100%', height: '500px', border: '1px solid #ddd', background: '#fff', overflow: 'hidden', marginTop: '20px' }}>
+        <h3>Workspace</h3>
+        {components.map((component) => (
+          <Rnd
+            key={component.id}
+            size={component.size}
+            position={component.position}
+            onDragStop={(_, data) => {
+              setComponents((prev) =>
+                prev.map((comp) =>
+                  comp.id === component.id ? { ...comp, position: { x: data.x, y: data.y } } : comp
+                )
+              );
+            }}
+            onResizeStop={(_, __, ref, ___, position) => {
+              setComponents((prev) =>
+                prev.map((comp) =>
+                  comp.id === component.id
+                    ? { ...comp, size: { width: ref.offsetWidth, height: ref.offsetHeight }, position }
+                    : comp
+                )
+              );
+            }}
+            bounds="parent"
+            enableResizing={{
+              top: true,
+              right: true,
+              bottom: true,
+              left: true,
+              topLeft: true,
+              topRight: true,
+              bottomLeft: true,
+              bottomRight: true,
+            }}
+            style={{
+              margin: '0',
+              padding: '0',
+              border: 'none',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ background: '#f0f0f0', width: '100%', height: '100%' }}>
+              {renderComponent(component)}
+              <button
+                onClick={() => editComponentProperties(component)}
                 style={{
-                  margin: '0',
-                  padding: '0',
+                  position: 'absolute',
+                  top: '5px',
+                  right: '5px',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
                   border: 'none',
-                  boxSizing: 'border-box',
+                  borderRadius: '3px',
+                  padding: '2px 5px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
                 }}
               >
-                <div style={{ background: '#f0f0f0', width: '100%', height: '100%' }}>
-                  {renderComponent(component)}
-                  <button
-                    onClick={() => editComponentProperties(component)}
-                    style={{
-                      position: 'absolute',
-                      top: '5px',
-                      right: '5px',
-                      backgroundColor: '#2196F3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '3px',
-                      padding: '2px 5px',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => removeComponentFromWorkspace(component.id || '')}
-                    style={{
-                      position: 'absolute',
-                      top: '30px',
-                      right: '5px',
-                      backgroundColor: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '3px',
-                      padding: '2px 5px',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    X
-                  </button>
-                </div>
-              </Rnd>
-            ))}
-          </div>
-        </div>
-      );
-    };
+                Edit
+              </button>
+              <button
+                onClick={() => removeComponentFromWorkspace(component.id || '')}
+                style={{
+                  position: 'absolute',
+                  top: '30px',
+                  right: '5px',
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '3px',
+                  padding: '2px 5px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                X
+              </button>
+            </div>
+          </Rnd>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-    export default PageEditor;
+export default PageEditor;
