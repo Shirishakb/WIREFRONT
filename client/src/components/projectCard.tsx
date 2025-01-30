@@ -23,7 +23,7 @@ const ProjectCard = (props: Props) => {
   const navigate = useNavigate();
 
   if (!project.image) {
-    project.image = "./public/placeholder2.png";
+    project.image = "./public/Placeholder2.png";
   }
 
   const deleteProjectCard = async (projectId: string) => {    
