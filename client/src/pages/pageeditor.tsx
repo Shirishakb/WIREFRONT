@@ -318,7 +318,6 @@ const PageEditor = () => {
         <div>
           <h3>{newPageName|| "Page"}</h3>
           <button onClick={() => setIsEditingPageName(true)}>Edit page</button>
-
         </div>
       )}
       {/* Modal for editing radio/checkbox options */}
