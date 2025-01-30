@@ -65,7 +65,8 @@ def get_page_by_id(pageId):
         "pageId": str(page["_id"]),
         "pageName": page["pageName"],
         "pageWidth": page["pageWidth"],
-        "pageHeight": page["pageHeight"]
+        "pageHeight": page["pageHeight"],
+        "projectId": page["projectId"]
     })
 
 # Update a page

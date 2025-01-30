@@ -16,15 +16,7 @@ const componentRenderer: React.FC<componentRenderProps> = ({ component, onUpdate
           case COMPONENT_TYPES.BUTTON:
             return <button>{properties?.text || 'Button'}</button>;
           case COMPONENT_TYPES.TEXTBOX:
-            return <input type="text" placeholder={properties?.placeholder || ''} />;
-          case COMPONENT_TYPES.SELECT:
-            return (
-              <select>
-                {(properties?.options || []).map((opt: string, index: number) => (
-                  <option key={index}>{opt}</option>
-                ))}
-              </select>
-            );
+            return <input type="text" placeholder={properties?.placeholder || ''} />;          
           default:
             return null;
         }

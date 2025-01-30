@@ -1,10 +1,23 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from db import users
 from models import hash_password, verify_password
+from bson.objectid import ObjectId
 
 # Create a new Blueprint
 auth_bp = Blueprint("auth", __name__)
+
+#GetUser
+@auth_bp.route("/auth/user", methods=["GET"])
+@jwt_required()
+def get_user():
+    user_id = get_jwt_identity()
+    user = users.find_one({"_id": ObjectId(user_id)})
+    return jsonify({
+        "userId": str(user["_id"]),
+        "username": user["username"],
+        "email": user["email"]
+    })
 
 # Signup route
 @auth_bp.route("/auth/signup", methods=["POST"])
