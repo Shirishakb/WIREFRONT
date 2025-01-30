@@ -1,7 +1,8 @@
 import auth from '../utils/auth';
 
 // POST Component
-const createComponent = async (pageId: string, compType: string, compSet: string) => {
+//const createComponent = async (pageId: string, compType: string, compSet: string) => {
+const createComponent = async (pageId: string, comp: any = {}) => {
     try {
         const response = await fetch(`/api/comp`,
             {
@@ -12,8 +13,9 @@ const createComponent = async (pageId: string, compType: string, compSet: string
                 },
                 body: JSON.stringify({ 
                     pageId: pageId,
-                    compType: compType,
-                    compSet: compSet
+                    ...comp,
+                    //compType: compType,
+                    //compSet: compSet
                  }),
             }
         );
@@ -84,6 +86,36 @@ const getComponentById = async (compId: string) => {
 };
 
 // PUT Component
+
+
+const updateComponent = async ( compId: string, comp: any) => {
+  try {
+
+      const response = await fetch(`/api/comp/${compId}`,
+          {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+                  authorization: `Bearer ${auth.getToken()}`,
+              },
+              body: JSON.stringify( comp ),
+          }
+      );
+
+    const data = await response.json();
+
+    if(!response.ok) {
+      throw new Error('invalid API response, check network tab!');
+    }
+
+    return data;
+  } catch (err) {
+    console.log('Error from data retrieval: ', err);
+    return null;
+  }
+};
+
+/*
 const updateComponent = async ( compId: string, compType: string, compSet: string, compWidth: number, compHeight: number, compXPos: number, compYPos: number, radioGroup: number | null = null, nodePage: number | null = null, parentComp: string | null = null, lockFlag: boolean | null = null ) => {
     try {
         const compBody: {
@@ -141,6 +173,7 @@ const updateComponent = async ( compId: string, compType: string, compSet: strin
       return null;
     }
 };
+*/
 
 // DELETE Component
 const deleteComponent = async (compId: string) => {
