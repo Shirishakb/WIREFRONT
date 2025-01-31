@@ -3,8 +3,10 @@
 ## Project Overview
 
 Wirefront is a Mock Web Page Builder designed to help you create rough layouts and structures for websites quickly. This tool allows you to use pre-designed components to assemble a basic idea of website layouts and functionalities. The aim is not to build a fully functional website but to provide a fast and rigid way to visualize website structures.
+![Alt text](client/public/LandingPage.png)
 
 The tool is built with JWT authentication for user sign-ins, and the projects are viewable only after logging in. The main goal is to simplify and expedite the process of creating and organizing pages, components, and projects for a website.
+![Alt text](client/public/pageeditor.png)
 
 ## Key Features
 
